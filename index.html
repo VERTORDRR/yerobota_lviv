@@ -5619,5 +5619,22 @@
       }
     };
   </script>
+  <script>
+let clickCount = 0;
+document.addEventListener('DOMContentLoaded', () => {
+  const logo = document.querySelector('img[alt="Логотип"], header img, nav img');
+  if (logo) {
+    logo.addEventListener('click', () => {
+      clickCount++;
+      if (clickCount === 5) {
+        clickCount = 0;
+        ui.activeTab = 'admin';
+        renderApp();
+        showToast('Режим адміністратора активовано!', 'info');
+      }
+    });
+  }
+});
+  </script>
 </body>
 </html>
