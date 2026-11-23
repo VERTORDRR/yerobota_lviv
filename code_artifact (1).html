@@ -1,0 +1,4213 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Підробіток.Львів — Швидка робота та виконавці</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css';" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" onerror="var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js';document.head.appendChild(s);"></script>
+  <style>
+    /* ==================== БАЗОВІ ТОКЕНИ ТА СКИДАННЯ ==================== */
+    :root {
+      --app-vh: 100dvh;
+      --bg-page: #0b1120;
+      --bg-header: rgba(15, 23, 42, 0.96);
+      --bg-card: #11192e;
+      --bg-card-elevated: #16213b;
+      --bg-input: #1e293b;
+      --bg-chip: #1a243b;
+      --border: #25324d;
+      --border-strong: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --amber: #fbbf24;
+      --amber-hover: #f59e0b;
+      --amber-text: #090d16;
+      --emerald: #10b981;
+      --emerald-bg: rgba(16, 185, 129, 0.14);
+      --emerald-border: rgba(16, 185, 129, 0.35);
+      --sky: #38bdf8;
+      --sky-bg: rgba(56, 189, 248, 0.14);
+      --rose: #f43f5e;
+      --rose-bg: rgba(244, 63, 94, 0.14);
+      --radius-sm: 10px;
+      --radius-md: 14px;
+      --radius-lg: 18px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100dvh;
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      padding-bottom: calc(84px + var(--safe-bottom));
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      transition: transform 0.12s ease, background-color 0.15s ease, opacity 0.15s ease, border-color 0.15s ease;
+    }
+
+    button:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* ==================== ВЕРХНЯ КОМПАКТНА ПЛАШКА ==================== */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-header);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: calc(8px + var(--safe-top)) 10px 8px;
+    }
+
+    .header-inner {
+      max-width: 640px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .brand-trigger {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      user-select: none;
+      flex-shrink: 0;
+      padding: 2px 0;
+    }
+
+    .brand-logo {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #fcd34d, #f59e0b);
+      color: var(--amber-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 900;
+      box-shadow: 0 2px 10px rgba(251, 191, 36, 0.28);
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 14.5px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      color: #ffffff;
+    }
+
+    .brand-title span {
+      color: var(--amber);
+    }
+
+    @media (max-width: 375px) {
+      .brand-title { font-size: 13.5px; }
+      .btn-header-add { font-size: 11.5px; padding: 6px 8px; }
+      .btn-header-profile { max-width: 96px; padding: 5px 7px; font-size: 11.5px; }
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .btn-header-add {
+      background: var(--amber);
+      color: var(--amber-text);
+      font-size: 12px;
+      font-weight: 800;
+      padding: 7px 10px;
+      border-radius: 10px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(251, 191, 36, 0.22);
+    }
+
+    .btn-header-add:hover {
+      background: var(--amber-hover);
+    }
+
+    .btn-header-profile {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 9px;
+      border-radius: 10px;
+      min-width: 0;
+      max-width: 112px;
+    }
+
+    .btn-header-profile .profile-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ==================== ОСНОВНИЙ КОНТЕЙНЕР ==================== */
+    .main-container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 12px;
+    }
+
+    .stack-sm { display: flex; flex-direction: column; gap: 8px; }
+    .stack-md { display: flex; flex-direction: column; gap: 12px; }
+    .stack-lg { display: flex; flex-direction: column; gap: 16px; }
+
+    /* ==================== КАРТКИ ТА ГЕРОЙ-БЛОК ==================== */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.22);
+    }
+
+    .hero-card {
+      background: linear-gradient(145deg, #16223d 0%, #0f172a 100%);
+      border: 1px solid #2d3d61;
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .pill-amber {
+      background: rgba(251, 191, 36, 0.14);
+      color: var(--amber);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .pill-emerald {
+      background: var(--emerald-bg);
+      color: #34d399;
+      border: 1px solid var(--emerald-border);
+    }
+
+    .pill-rose {
+      background: var(--rose-bg);
+      color: #fb7185;
+      border: 1px solid rgba(244, 63, 94, 0.35);
+    }
+
+    .pill-sky {
+      background: var(--sky-bg);
+      color: #7dd3fc;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+
+    .hero-title {
+      margin: 8px 0 6px;
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #ffffff;
+    }
+
+    .hero-desc {
+      margin: 0 0 12px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    /* ==================== КНОПКИ ==================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      text-align: center;
+    }
+
+    .btn-full { width: 100%; }
+    .btn-sm { font-size: 12px; padding: 7px 11px; border-radius: 10px; }
+    .btn-xs { font-size: 11px; padding: 5px 9px; border-radius: 8px; }
+
+    .btn-primary {
+      background: var(--amber);
+      color: var(--amber-text);
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(251, 191, 36, 0.22);
+    }
+    .btn-primary:hover { background: var(--amber-hover); }
+
+    .btn-emerald {
+      background: var(--emerald);
+      color: #042f1e;
+      font-weight: 800;
+    }
+
+    .btn-sky {
+      background: var(--sky);
+      color: #082f49;
+      font-weight: 800;
+    }
+
+    .btn-secondary {
+      background: var(--bg-input);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+    }
+
+    .btn-danger {
+      background: var(--rose-bg);
+      color: #fb7185;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    /* ==================== ПОЛЯ ВВОДУ ТА ФІЛЬТРИ ==================== */
+    .input-field, .select-field, .textarea-field {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .input-field:focus, .select-field:focus, .textarea-field:focus {
+      border-color: var(--amber);
+    }
+
+    .input-field::placeholder, .textarea-field::placeholder {
+      color: var(--text-muted);
+    }
+
+    .field-label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    @media (max-width: 380px) {
+      .grid-2-mobile-stack {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ==================== ШВИДКІ ТЕГИ ТА ПЕРЕМИКАЧІ ==================== */
+    .tags-scroll {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .tags-scroll::-webkit-scrollbar { display: none; }
+
+    /* Вертикальне меню адмін-панелі в стовпчик */
+    .admin-nav-column {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .admin-nav-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 10px 14px;
+      border-radius: 12px;
+      text-align: left;
+    }
+
+    .admin-nav-btn.active {
+      background: rgba(251, 191, 36, 0.14);
+      border-color: var(--amber);
+      color: var(--amber);
+      font-weight: 800;
+    }
+
+    .admin-nav-badge {
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border-strong);
+    }
+
+    .admin-nav-btn.active .admin-nav-badge {
+      background: var(--amber);
+      color: var(--amber-text);
+      border-color: var(--amber);
+    }
+
+    .tag-chip {
+      background: var(--bg-input);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 6px 11px;
+      border-radius: 999px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .tag-chip.active {
+      background: var(--amber);
+      color: var(--amber-text);
+      border-color: var(--amber);
+      font-weight: 800;
+    }
+
+    .segmented-control {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: #0a0f1d;
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .seg-btn {
+      padding: 8px 10px;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .seg-btn.active {
+      background: var(--bg-input);
+      color: #ffffff;
+      border: 1px solid rgba(251, 191, 36, 0.5);
+    }
+
+    /* ==================== КАРТКА ВАКАНСІЇ ==================== */
+    .job-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+    }
+
+    .job-card.is-top {
+      border-color: rgba(251, 191, 36, 0.65);
+      background: linear-gradient(160deg, rgba(251, 191, 36, 0.07) 0%, var(--bg-card) 45%);
+    }
+
+    .job-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .job-badges {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+
+    .badge-top {
+      background: var(--amber);
+      color: var(--amber-text);
+      font-size: 10.5px;
+      font-weight: 900;
+      padding: 2px 7px;
+      border-radius: 6px;
+    }
+
+    .badge-urgent {
+      background: var(--rose);
+      color: #ffffff;
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 6px;
+    }
+
+    .badge-cat {
+      background: var(--bg-input);
+      color: var(--text-secondary);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .badge-district {
+      color: var(--amber);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .job-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.3;
+    }
+
+    .btn-save-heart {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .job-pay-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pay-tag {
+      background: var(--emerald-bg);
+      color: #34d399;
+      border: 1px solid var(--emerald-border);
+      font-size: 12.5px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 9px;
+    }
+
+    .schedule-tag {
+      background: var(--bg-input);
+      color: var(--text-secondary);
+      font-size: 12px;
+      padding: 4px 9px;
+      border-radius: 9px;
+    }
+
+    /* Прогрес набору людей */
+    .hiring-box {
+      background: #0c1324;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 8px 10px;
+    }
+
+    .hiring-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: var(--bg-input);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--amber), var(--emerald));
+      border-radius: 999px;
+      transition: width 0.25s ease;
+    }
+
+    .countdown-banner {
+      background: rgba(244, 63, 94, 0.14);
+      border: 1px solid rgba(244, 63, 94, 0.35);
+      color: #fda4af;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .job-desc {
+      margin: 0;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      white-space: pre-line;
+    }
+
+    .job-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 9px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .employer-info {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .employer-info strong {
+      color: var(--text-primary);
+    }
+
+    .rating-star {
+      color: var(--amber);
+      font-weight: 800;
+    }
+
+    .locked-contact-box {
+      width: 100%;
+      background: rgba(251, 191, 36, 0.08);
+      border: 1px dashed rgba(251, 191, 36, 0.35);
+      border-radius: 11px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11.5px;
+      color: #fde68a;
+    }
+
+    /* ==================== СПРАВЖНЯ КАРТА ЛЬВОВА (LEAFLET + OSM) ==================== */
+    .map-wrapper {
+      width: 100%;
+      height: 360px;
+      min-height: 360px;
+      flex-shrink: 0;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #0d1629;
+      border: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+
+    .picker-map-wrapper {
+      width: 100%;
+      height: 210px;
+      min-height: 210px;
+      flex-shrink: 0;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #0d1629;
+      border: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+
+    .leaflet-container {
+      width: 100%;
+      height: 100%;
+      z-index: 1 !important;
+      font-family: inherit;
+    }
+
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+      background: #11192e !important;
+      color: #f8fafc !important;
+      border: 1px solid #334155;
+      border-radius: 12px !important;
+    }
+
+    .leaflet-popup-content {
+      margin: 10px 12px !important;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    /* ==================== НИЖНЯ НАВІГАЦІЯ ==================== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      background: var(--bg-header);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      padding: 6px 8px calc(6px + var(--safe-bottom));
+    }
+
+    .bottom-nav-inner {
+      max-width: 640px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 4px;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .nav-item .nav-icon {
+      font-size: 18px;
+      line-height: 1.1;
+    }
+
+    .nav-item.active {
+      color: var(--amber);
+      font-weight: 800;
+    }
+
+    /* ==================== МОДАЛЬНІ ВІКНА (ЦЕНТРУВАННЯ + ЗАКРІПЛЕНИЙ НИЗ) ==================== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: var(--app-vh, 100dvh);
+      z-index: 9999;
+      background: rgba(3, 7, 18, 0.84);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: min(480px, calc(100vw - 24px));
+      max-height: calc(var(--app-vh, 100dvh) - 24px);
+      margin: 0 auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-body {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-body > * {
+      flex-shrink: 0;
+    }
+
+    .modal-footer {
+      flex-shrink: 0;
+      padding: 12px 16px calc(12px + var(--safe-bottom));
+      background: var(--bg-card-elevated);
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 15.5px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .btn-close-modal {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-input);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    /* Лічильник людей у формі вакансії */
+    .counter-box {
+      background: var(--bg-input);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .counter-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .stepper-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-step {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: #0f172a;
+      border: 1px solid var(--border-strong);
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preset-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .preset-pill {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+
+    .preset-pill.active {
+      background: var(--amber);
+      color: var(--amber-text);
+      border-color: var(--amber);
+    }
+
+    /* Блоки платного просування */
+    .promo-option-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      cursor: pointer;
+    }
+
+    .promo-option-card.checked {
+      border-color: var(--amber);
+      background: rgba(251, 191, 36, 0.1);
+    }
+
+    .price-summary-box {
+      background: #0a0f1d;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      font-size: 12px;
+    }
+
+    /* ==================== СПОВІЩЕННЯ (TOASTS ПО ЦЕНТРУ В МЕЖАХ ЕКРАНУ) ==================== */
+    .toast-container {
+      position: fixed;
+      top: calc(58px + var(--safe-top));
+      left: 12px;
+      right: 12px;
+      max-width: 440px;
+      margin: 0 auto;
+      z-index: 10050;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast-item {
+      pointer-events: auto;
+      background: #16213b;
+      border: 1px solid var(--border-strong);
+      color: #ffffff;
+      padding: 11px 14px;
+      border-radius: 13px;
+      font-size: 12.5px;
+      font-weight: 600;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      animation: toastSlideIn 0.2s ease-out;
+    }
+
+    .toast-item.success { border-left: 4px solid var(--emerald); }
+    .toast-item.error { border-left: 4px solid var(--rose); }
+    .toast-item.info { border-left: 4px solid var(--amber); }
+
+    @keyframes toastSlideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .animate-shake { animation: shake 0.35s ease-in-out; }
+
+    /* Адмін-статистика */
+    .stat-card {
+      background: #0c1324;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+    }
+    .stat-label { font-size: 11px; color: var(--text-muted); }
+    .stat-value { font-size: 19px; font-weight: 900; margin-top: 4px; }
+
+    /* Поширення вакансії, зірковий рейтинг та панель версії */
+    .share-preview-box {
+      background: #0a0f1d;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 11px 12px;
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--text-secondary);
+      white-space: pre-line;
+      user-select: text;
+    }
+
+    .star-picker-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 6px 0;
+    }
+
+    .star-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-strong);
+      font-size: 20px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .star-btn.active {
+      background: rgba(251, 191, 36, 0.18);
+      border-color: var(--amber);
+      color: var(--amber);
+      transform: scale(1.05);
+    }
+
+    .version-footer-bar {
+      background: #0c1324;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- КОНТЕЙНЕР СПОВІЩЕНЬ ПО ЦЕНТРУ ЕКРАНУ -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- КОМПАКТНА ВЕРХНЯ ПЛАШКА В ОДИН РЯДОК -->
+  <header class="app-header">
+    <div class="header-inner">
+      <!-- Логотип: 5 швидких кліків відкривають прихований вхід в адмінку -->
+      <div id="secretLogoTrigger" class="brand-trigger" title="Підробіток.Львів">
+        <div class="brand-logo">🦁</div>
+        <span class="brand-title">Підробіток<span>.Львів</span></span>
+      </div>
+
+      <!-- Праві компактні кнопки -->
+      <div class="header-actions">
+        <button onclick="handleOpenJobCreate()" class="btn-header-add">+ Вакансія</button>
+        <button onclick="switchTab('cabinet')" class="btn-header-profile">
+          <span id="headerRoleIcon">🔒</span>
+          <span id="headerUserName" class="profile-label">Гість</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ОСНОВНИЙ КОНТЕНТ -->
+  <main class="main-container">
+
+    <!-- ==================== ВКЛАДКА 1: ВАКАНСІЇ ==================== -->
+    <section id="tab-jobs" class="stack-md">
+      <!-- Герой-блок -->
+      <div class="hero-card">
+        <div class="pill-badge pill-amber">📍 Львів та передмістя • Прямі контакти</div>
+        <h1 class="hero-title">Швидкий підробіток у місті Лева</h1>
+        <p class="hero-desc">
+          Шукайте роботу за районом або на карті Львова. Обов'язкова реєстрація захищає від спаму та відкриває взаємні рейтинги.
+        </p>
+        <button onclick="handleOpenJobCreate()" class="btn btn-primary btn-full">
+          + Виставити пропозицію роботи
+        </button>
+      </div>
+
+      <!-- Блок фільтрів -->
+      <div class="card stack-sm">
+        <input id="searchInput" oninput="renderJobs()" type="text" class="input-field" placeholder="🔍 Пошук вакансії, вулиці, оплати..." />
+
+        <div class="grid-2 grid-2-mobile-stack">
+          <select id="districtFilter" onchange="renderJobs()" class="select-field">
+            <option value="">📍 Усі райони Львова</option>
+            <option value="Галицький / Центр">Галицький / Центр</option>
+            <option value="Сихівський">Сихівський</option>
+            <option value="Франківський">Франківський</option>
+            <option value="Шевченківський">Шевченківський</option>
+            <option value="Личаківський">Личаківський</option>
+            <option value="Залізничний">Залізничний</option>
+            <option value="Винники">Винники</option>
+            <option value="Сокільники">Сокільники</option>
+            <option value="Брюховичі">Брюховичі</option>
+            <option value="Рудне / Зимна Вода">Рудне / Зимна Вода</option>
+            <option value="Малехів / Дубляни">Малехів / Дубляни</option>
+          </select>
+
+          <select id="categoryFilter" onchange="renderJobs()" class="select-field">
+            <option value="">🗂 Усі категорії</option>
+            <option value="Кур'єр / Доставка">Кур'єр / Доставка</option>
+            <option value="Вантажники / Переїзди">Вантажники / Переїзди</option>
+            <option value="Будівництво / Ремонт">Будівництво / Ремонт</option>
+            <option value="Прибирання / Клінінг">Прибирання / Клінінг</option>
+            <option value="Заклади / Кухня">Заклади / Кухня</option>
+            <option value="Промоутер / Реклама">Промоутер / Реклама</option>
+            <option value="Склад / Різноробочі">Склад / Різноробочі</option>
+            <option value="Інше">Інше</option>
+          </select>
+        </div>
+
+        <select id="sortFilter" onchange="renderJobs()" class="select-field">
+          <option value="newest">Сортування: ⭐ ТОП та новіші</option>
+          <option value="urgent">Сортування: 🔥 Термінові спочатку</option>
+        </select>
+
+        <!-- Швидкі теги -->
+        <div class="tags-scroll">
+          <button data-tag="all" onclick="setTagFilter('all')" class="tag-chip active">Усі</button>
+          <button data-tag="daily" onclick="setTagFilter('daily')" class="tag-chip">💰 Виплата щодня</button>
+          <button data-tag="weekend" onclick="setTagFilter('weekend')" class="tag-chip">📅 На вихідних</button>
+          <button data-tag="onetime" onclick="setTagFilter('onetime')" class="tag-chip">⚡ Разова робота</button>
+          <button data-tag="urgent" onclick="setTagFilter('urgent')" class="tag-chip">🔥 Терміново</button>
+          <button data-tag="saved" onclick="setTagFilter('saved')" class="tag-chip">❤️ Збережені (<span id="savedCount">0</span>)</button>
+        </div>
+
+        <!-- Перемикач Список / Карта -->
+        <div class="segmented-control">
+          <button id="btnViewList" onclick="setJobsView('list')" class="seg-btn active">📋 Список</button>
+          <button id="btnViewMap" onclick="setJobsView('map')" class="seg-btn">🗺 Карта Львова</button>
+        </div>
+      </div>
+
+      <!-- Стрічка вакансій -->
+      <div id="jobsListContainer" class="stack-md"></div>
+
+      <!-- Карта Львова -->
+      <div id="jobsMapContainer" class="card hidden">
+        <div id="mainLvivMap" class="map-wrapper"></div>
+      </div>
+    </section>
+
+    <!-- ==================== ВКЛАДКА 2: ВИКОНАВЦІ ==================== -->
+    <section id="tab-workers" class="stack-md hidden">
+      <div class="hero-card">
+        <div class="pill-badge pill-emerald">👷 Перевірені помічники та майстри Львова</div>
+        <h2 class="hero-title">База виконавців Львова</h2>
+        <p class="hero-desc">
+          Зареєстровані виконавці з рейтингом та спеціалізацією. Реєструйтесь у кабінеті, щоб з'явитися у списку або зв'язатися з майстрами.
+        </p>
+      </div>
+
+      <div class="card stack-sm">
+        <input id="workerSearchInput" oninput="renderWorkers()" type="text" class="input-field" placeholder="🔍 Пошук за ім'ям або спеціалізацією..." />
+        <div class="grid-2 grid-2-mobile-stack">
+          <select id="workerDistrictFilter" onchange="renderWorkers()" class="select-field">
+            <option value="">📍 Усі райони Львова</option>
+            <option value="Галицький / Центр">Галицький / Центр</option>
+            <option value="Сихівський">Сихівський</option>
+            <option value="Франківський">Франківський</option>
+            <option value="Шевченківський">Шевченківський</option>
+            <option value="Личаківський">Личаківський</option>
+            <option value="Залізничний">Залізничний</option>
+            <option value="Винники">Винники</option>
+            <option value="Сокільники">Сокільники</option>
+            <option value="Брюховичі">Брюховичі</option>
+            <option value="Рудне / Зимна Вода">Рудне / Зимна Вода</option>
+            <option value="Малехів / Дубляни">Малехів / Дубляни</option>
+          </select>
+          <label style="display:flex;align-items:center;gap:8px;background:var(--bg-input);padding:8px 12px;border-radius:14px;border:1px solid var(--border-strong);font-size:12px;cursor:pointer;">
+            <input id="onlyFreeWorkers" onchange="renderWorkers()" type="checkbox" checked style="accent-color:var(--amber);" />
+            <span>Тільки вільні</span>
+          </label>
+        </div>
+      </div>
+
+      <div id="workersListContainer" class="stack-sm"></div>
+    </section>
+
+    <!-- ==================== ВКЛАДКА 3: КАБІНЕТ ==================== -->
+    <section id="tab-cabinet" class="stack-md hidden">
+      <!-- Банер для незареєстрованого гостя -->
+      <div id="guestRegisterBanner" class="hero-card">
+        <div class="pill-badge pill-amber">🔒 Обов'язкова реєстрація</div>
+        <h2 class="hero-title">Створіть профіль за 30 секунд</h2>
+        <p class="hero-desc">
+          Без реєстрації неможливо публікувати вакансії, переглядати контакти роботодавців або братися за роботу.
+        </p>
+        <div class="grid-2">
+          <button onclick="openRegistrationModal('employer')" class="btn btn-primary">💼 Я Роботодавець</button>
+          <button onclick="openRegistrationModal('worker')" class="btn btn-emerald">👷 Я Виконавець</button>
+        </div>
+      </div>
+
+      <!-- Картка профілю -->
+      <div id="registeredProfileCard" class="card stack-md hidden">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+          <div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <h2 id="cabUserName" style="margin:0;font-size:16px;font-weight:800;">Користувач</h2>
+              <span id="cabRatingBadge" class="pill-badge pill-amber">★ 5.0 (0)</span>
+            </div>
+            <p id="cabUserMeta" style="margin:4px 0 0;font-size:12px;color:var(--text-muted);">Роботодавець • Львів</p>
+          </div>
+          <button onclick="toggleEditProfile()" class="btn btn-secondary btn-xs">✏️ Змінити</button>
+        </div>
+
+        <div class="segmented-control">
+          <button id="roleBtnEmployer" onclick="setUserRole('employer')" class="seg-btn">💼 Роботодавець</button>
+          <button id="roleBtnWorker" onclick="setUserRole('worker')" class="seg-btn">👷 Виконавець</button>
+        </div>
+
+        <!-- Форма редагування профілю -->
+        <div id="editProfileForm" class="stack-sm hidden" style="padding-top:10px;border-top:1px solid var(--border);">
+          <div>
+            <label class="field-label">Ім'я або назва компанії *</label>
+            <input id="profName" type="text" class="input-field" />
+          </div>
+          <div class="grid-2">
+            <div>
+              <label class="field-label">Телефон *</label>
+              <input id="profPhone" type="tel" class="input-field" placeholder="+380..." />
+            </div>
+            <div>
+              <label class="field-label">Telegram @username</label>
+              <input id="profUsername" type="text" class="input-field" placeholder="@username" />
+            </div>
+          </div>
+          <div class="grid-2">
+            <div>
+              <label class="field-label">Район Львова</label>
+              <select id="profDistrict" class="select-field">
+                <option value="Галицький / Центр">Галицький / Центр</option>
+                <option value="Сихівський">Сихівський</option>
+                <option value="Франківський">Франківський</option>
+                <option value="Шевченківський">Шевченківський</option>
+                <option value="Личаківський">Личаківський</option>
+                <option value="Залізничний">Залізничний</option>
+                <option value="Винники">Винники</option>
+                <option value="Сокільники">Сокільники</option>
+                <option value="Брюховичі">Брюховичі</option>
+                <option value="Рудне / Зимна Вода">Рудне / Зимна Вода</option>
+                <option value="Малехів / Дубляни">Малехів / Дубляни</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Спеціалізація</label>
+              <input id="profSpec" type="text" class="input-field" placeholder="Вантажник, кур'єр..." />
+            </div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#34d399;cursor:pointer;">
+            <input id="profIsFree" type="checkbox" checked style="accent-color:var(--emerald);" />
+            <span>Показувати мене в базі «Вільні виконавці»</span>
+          </label>
+          <button onclick="saveProfile()" class="btn btn-emerald btn-full">💾 Зберегти профіль</button>
+        </div>
+      </div>
+
+      <!-- Мої вакансії (для роботодавця) -->
+      <div id="employerCabinetBlock" class="card stack-sm hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <h3 style="margin:0;font-size:14px;font-weight:800;">📋 Мої пропозиції роботи</h3>
+          <span id="freeLimitBadge" class="pill-badge pill-amber">Ліміт: 1</span>
+        </div>
+        <div id="myJobsList" class="stack-sm"></div>
+      </div>
+
+      <!-- Відгуки на мої вакансії -->
+      <div id="employerAppsBlock" class="card stack-sm hidden">
+        <h3 style="margin:0;font-size:14px;font-weight:800;">🙋 Відгуки виконавців на мої вакансії</h3>
+        <div id="employerApplicationsList" class="stack-sm"></div>
+      </div>
+
+      <!-- Мої відгуки (для виконавця) -->
+      <div id="workerAppsBlock" class="card stack-sm hidden">
+        <h3 style="margin:0;font-size:14px;font-weight:800;">📨 Мої відгуки на вакансії</h3>
+        <div id="myApplicationsList" class="stack-sm"></div>
+      </div>
+
+      <!-- Отримані відгуки та оцінки -->
+      <div id="myReviewsBlock" class="card stack-sm hidden">
+        <h3 style="margin:0;font-size:14px;font-weight:800;">⭐ Відгуки та оцінки про мене</h3>
+        <div id="myReceivedReviewsList" class="stack-sm"></div>
+      </div>
+
+      <!-- Індикатор версії та ручне оновлення -->
+      <div class="version-footer-bar">
+        <div>
+          <strong style="color:var(--text-secondary);">v2.6 • Підробіток.Львів</strong>
+          <span class="last-sync-label" style="display:block;font-size:10.5px;">Оновлено: щойно</span>
+        </div>
+        <button onclick="manualSyncNow()" class="btn btn-secondary btn-xs">🔄 Оновити стрічку</button>
+      </div>
+    </section>
+
+    <!-- ==================== ПРИХОВАНА АДМІН-ПАНЕЛЬ ВЛАСНИКА ==================== -->
+    <section id="tab-admin" class="stack-md hidden">
+      <div class="hero-card" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <div>
+          <div class="pill-badge pill-amber">🛡️ Режим власника</div>
+          <h2 style="margin:6px 0 2px;font-size:16px;font-weight:800;">Адмін-панель «Підробіток.Львів»</h2>
+          <p style="margin:0;font-size:11.5px;color:var(--text-muted);">Monobank, модерація, Бот та Firebase</p>
+        </div>
+        <button onclick="exitAdmin()" class="btn btn-secondary btn-sm">🔓 Вийти</button>
+      </div>
+
+      <div class="admin-nav-column">
+        <button onclick="setAdminSubTab('stats')" id="admBtn-stats" class="admin-nav-btn active">
+          <span>📊 Доходи та статистика</span>
+          <span>›</span>
+        </button>
+        <button onclick="setAdminSubTab('payments')" id="admBtn-payments" class="admin-nav-btn">
+          <span>💳 Оплати Monobank</span>
+          <span id="pendingPayCount" class="admin-nav-badge">0</span>
+        </button>
+        <button onclick="setAdminSubTab('users')" id="admBtn-users" class="admin-nav-btn">
+          <span>👥 Юзери (Роботодавці та Виконавці)</span>
+          <span id="adminUsersTabCount" class="admin-nav-badge">0</span>
+        </button>
+        <button onclick="setAdminSubTab('moderation')" id="admBtn-moderation" class="admin-nav-btn">
+          <span>📋 Вакансії та модерація</span>
+          <span id="adminJobsTabCount" class="admin-nav-badge">0</span>
+        </button>
+        <button onclick="setAdminSubTab('monobank')" id="admBtn-monobank" class="admin-nav-btn">
+          <span>🏦 Реквізити Monobank і Ціни</span>
+          <span>›</span>
+        </button>
+        <button onclick="setAdminSubTab('bot')" id="admBtn-bot" class="admin-nav-btn">
+          <span>🤖 Telegram Бот, Хмара, PIN</span>
+          <span>›</span>
+        </button>
+      </div>
+
+      <!-- Адмін 1: Доходи -->
+      <div id="adm-stats" class="grid-2">
+        <div class="stat-card">
+          <div class="stat-label">Підтверджений дохід</div>
+          <div id="statRevenue" class="stat-value" style="color:var(--emerald);">0 грн</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Оплачених замовлень</div>
+          <div id="statPaidOrders" class="stat-value" style="color:var(--amber);">0</div>
+        </div>
+        <div class="stat-card" onclick="setAdminSubTab('moderation')" style="cursor:pointer;">
+          <div class="stat-label">Активних вакансій</div>
+          <div id="statActiveJobs" class="stat-value" style="color:#ffffff;">0</div>
+        </div>
+        <div class="stat-card" onclick="setAdminSubTab('users')" style="cursor:pointer;">
+          <div class="stat-label">Зареєстрованих юзерів</div>
+          <div id="statUsersCount" class="stat-value" style="color:var(--sky);">0</div>
+        </div>
+      </div>
+
+      <!-- Адмін 2: Оплати Monobank -->
+      <div id="adm-payments" class="stack-sm hidden"></div>
+
+      <!-- Адмін 3: Зареєстровані юзери (Роботодавці та Виконавці) -->
+      <div id="adm-users" class="stack-sm hidden">
+        <div class="card stack-sm">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+            <h3 style="margin:0;font-size:14px;font-weight:800;">👥 База зареєстрованих користувачів</h3>
+            <span id="adminUsersSummaryBadge" class="pill-badge pill-sky">Усього: 0</span>
+          </div>
+
+          <input id="adminUserSearchInput" oninput="renderAdminUsersList()" type="text" class="input-field" placeholder="🔍 Пошук за ім'ям, телефоном, @username, районом..." />
+
+          <div class="tags-scroll">
+            <button type="button" onclick="setAdminUserRoleFilter('all')" id="admUserRole-all" class="tag-chip active">Усі (<span id="admCountAllUsers">0</span>)</button>
+            <button type="button" onclick="setAdminUserRoleFilter('employer')" id="admUserRole-employer" class="tag-chip">💼 Роботодавці (<span id="admCountEmployers">0</span>)</button>
+            <button type="button" onclick="setAdminUserRoleFilter('worker')" id="admUserRole-worker" class="tag-chip">👷 Виконавці (<span id="admCountWorkers">0</span>)</button>
+          </div>
+        </div>
+
+        <div id="adminUsersList" class="stack-sm"></div>
+      </div>
+
+      <!-- Адмін 4: Модерація вакансій -->
+      <div id="adm-moderation" class="stack-md hidden"></div>
+
+      <!-- Адмін 5: Реквізити і Ціни -->
+      <div id="adm-monobank" class="card stack-sm hidden">
+        <h3 style="margin:0;font-size:14px;font-weight:800;">🏦 Реквізити Monobank та тарифи</h3>
+        <div>
+          <label class="field-label">Картка Monobank або посилання на Банку</label>
+          <input id="cfgMonoCard" type="text" class="input-field" />
+        </div>
+        <div class="grid-2">
+          <div>
+            <label class="field-label">Ціна публікації (грн)</label>
+            <input id="cfgPrice" type="number" class="input-field" />
+          </div>
+          <div>
+            <label class="field-label">Безкоштовних публікацій</label>
+            <input id="cfgFreeLimit" type="number" class="input-field" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label class="field-label">⭐ Вивести в ТОП (грн)</label>
+            <input id="cfgTopPrice" type="number" class="input-field" />
+          </div>
+          <div>
+            <label class="field-label">🔥 Термінове (грн)</label>
+            <input id="cfgUrgentPrice" type="number" class="input-field" />
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Промокоди на безкоштовну публікацію (через кому)</label>
+          <input id="cfgPromos" type="text" class="input-field" placeholder="LVIV2026, START" />
+        </div>
+        <button onclick="saveAdminSettings()" class="btn btn-primary btn-full">💾 Зберегти тарифи та реквізити</button>
+      </div>
+
+      <!-- Адмін 5: Бот, Хмара, PIN -->
+      <div id="adm-bot" class="card stack-sm hidden">
+        <h3 style="margin:0;font-size:14px;font-weight:800;">🤖 Telegram Бот, Firebase та Безпека</h3>
+        <div>
+          <label class="field-label">Telegram Bot Token (від @BotFather)</label>
+          <input id="cfgBotToken" type="text" class="input-field" />
+        </div>
+        <div class="grid-2">
+          <div>
+            <label class="field-label">Admin Chat ID</label>
+            <input id="cfgAdminChatId" type="text" class="input-field" />
+          </div>
+          <div>
+            <label class="field-label">PIN-код адмінки</label>
+            <input id="cfgAdminPin" type="text" maxlength="8" class="input-field" />
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Telegram ID власників (через кому)</label>
+          <input id="cfgOwnerIds" type="text" class="input-field" />
+        </div>
+        <div>
+          <label class="field-label">Firebase Realtime Database URL</label>
+          <input id="cfgFirebaseUrl" type="url" class="input-field" />
+        </div>
+        <div class="grid-2">
+          <button onclick="saveAdminSettings()" class="btn btn-primary">💾 Зберегти все</button>
+          <button onclick="testTelegramBot()" class="btn btn-sky">📨 Тест у бот</button>
+        </div>
+      </div>
+
+      <!-- Індикатор версії в адмінці -->
+      <div class="version-footer-bar">
+        <div>
+          <strong style="color:var(--amber);">v2.6 • Підробіток.Львів</strong>
+          <span class="last-sync-label" style="display:block;font-size:10.5px;">Оновлено: щойно</span>
+        </div>
+        <button onclick="manualSyncNow()" class="btn btn-secondary btn-xs">🔄 Оновити базу</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- НИЖНЯ НАВІГАЦІЯ -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button onclick="switchTab('jobs')" id="nav-jobs" class="nav-item active">
+        <span class="nav-icon">🔍</span>
+        <span>Вакансії</span>
+      </button>
+      <button onclick="switchTab('workers')" id="nav-workers" class="nav-item">
+        <span class="nav-icon">👷</span>
+        <span>Виконавці</span>
+      </button>
+      <button onclick="switchTab('cabinet')" id="nav-cabinet" class="nav-item">
+        <span class="nav-icon">👤</span>
+        <span>Кабінет</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==================== МОДАЛКА 1: ОБОВ'ЯЗКОВА РЕЄСТРАЦІЯ ==================== -->
+  <div id="registrationModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">📝 Реєстрація на платформі</h2>
+        <button onclick="closeRegistrationModal()" class="btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin:0;font-size:12px;color:var(--text-secondary);">
+          Оберіть свою роль та заповніть контакти, щоб публікувати роботу або братися за замовлення у Львові.
+        </p>
+
+        <div class="segmented-control">
+          <button id="regRoleEmployer" onclick="selectRegRole('employer')" class="seg-btn active">💼 Роботодавець</button>
+          <button id="regRoleWorker" onclick="selectRegRole('worker')" class="seg-btn">👷 Виконавець</button>
+        </div>
+
+        <div>
+          <label class="field-label">Ім'я або назва компанії *</label>
+          <input id="regName" type="text" class="input-field" placeholder="Напр.: Олександр або Кав'ярня Лева" />
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label class="field-label">Номер телефону *</label>
+            <input id="regPhone" type="tel" class="input-field" placeholder="+380671234567" />
+          </div>
+          <div>
+            <label class="field-label">Telegram @username</label>
+            <input id="regUsername" type="text" class="input-field" placeholder="@username" />
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label">Район Львова або передмістя *</label>
+          <select id="regDistrict" class="select-field">
+            <option value="Галицький / Центр">Галицький / Центр</option>
+            <option value="Сихівський">Сихівський</option>
+            <option value="Франківський">Франківський</option>
+            <option value="Шевченківський">Шевченківський</option>
+            <option value="Личаківський">Личаківський</option>
+            <option value="Залізничний">Залізничний</option>
+            <option value="Винники">Винники</option>
+            <option value="Сокільники">Сокільники</option>
+            <option value="Брюховичі">Брюховичі</option>
+            <option value="Рудне / Зимна Вода">Рудне / Зимна Вода</option>
+            <option value="Малехів / Дубляни">Малехів / Дубляни</option>
+          </select>
+        </div>
+
+        <div id="regSpecGroup" class="hidden">
+          <label class="field-label">Ваша спеціалізація *</label>
+          <input id="regSpec" type="text" class="input-field" placeholder="Напр.: Вантажник, кур'єр, майстер ремонту..." />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="completeRegistration()" class="btn btn-primary btn-full">
+          ✅ Завершити реєстрацію
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛКА 2: СТВОРЕННЯ ВАКАНСІЇ ==================== -->
+  <div id="jobModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">💼 Нова пропозиція роботи у Львові</h2>
+        <button onclick="closeJobModal()" class="btn-close-modal">✕</button>
+      </div>
+
+      <div id="jobModalBody" class="modal-body">
+        <div id="jobLimitBanner" class="pill-badge pill-amber" style="border-radius:11px;padding:8px 10px;line-height:1.35;"></div>
+
+        <div>
+          <label class="field-label">Назва вакансії *</label>
+          <input id="jobTitle" type="text" class="input-field" placeholder="Напр.: Потрібні 2 вантажники на переїзд" />
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label class="field-label">Категорія *</label>
+            <select id="jobCategory" class="select-field">
+              <option value="Кур'єр / Доставка">Кур'єр / Доставка</option>
+              <option value="Вантажники / Переїзди">Вантажники / Переїзди</option>
+              <option value="Будівництво / Ремонт">Будівництво / Ремонт</option>
+              <option value="Прибирання / Клінінг">Прибирання / Клінінг</option>
+              <option value="Заклади / Кухня">Заклади / Кухня</option>
+              <option value="Промоутер / Реклама">Промоутер / Реклама</option>
+              <option value="Склад / Різноробочі">Склад / Різноробочі</option>
+              <option value="Інше">Інше</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Оплата *</label>
+            <input id="jobPay" type="text" class="input-field" placeholder="1400 грн/зміна" />
+          </div>
+        </div>
+
+        <!-- Кількість потрібних людей -->
+        <div class="counter-box">
+          <div class="counter-row">
+            <span style="font-size:12px;font-weight:700;">👥 Скільки людей потрібно?</span>
+            <div class="stepper-controls">
+              <button type="button" onclick="adjustNeededInput(-1)" class="btn-step">−</button>
+              <span id="jobNeededDisplay" style="font-size:15px;font-weight:900;min-width:24px;text-align:center;color:var(--amber);">1</span>
+              <button type="button" onclick="adjustNeededInput(1)" class="btn-step">+</button>
+            </div>
+          </div>
+          <div class="preset-pills">
+            <button type="button" onclick="setNeededPreset(1)" class="preset-pill active" data-preset="1">1 людина</button>
+            <button type="button" onclick="setNeededPreset(2)" class="preset-pill" data-preset="2">2</button>
+            <button type="button" onclick="setNeededPreset(3)" class="preset-pill" data-preset="3">3</button>
+            <button type="button" onclick="setNeededPreset(5)" class="preset-pill" data-preset="5">5</button>
+            <button type="button" onclick="setNeededPreset(10)" class="preset-pill" data-preset="10">10</button>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label class="field-label">Коли / Графік</label>
+            <input id="jobSchedule" type="text" class="input-field" placeholder="Завтра 09:00 - 17:00" />
+          </div>
+          <div>
+            <label class="field-label">Район Львова *</label>
+            <select id="jobDistrict" onchange="syncPickerDistrict(this.value)" class="select-field">
+              <option value="Галицький / Центр">Галицький / Центр</option>
+              <option value="Сихівський">Сихівський</option>
+              <option value="Франківський">Франківський</option>
+              <option value="Шевченківський">Шевченківський</option>
+              <option value="Личаківський">Личаківський</option>
+              <option value="Залізничний">Залізничний</option>
+              <option value="Винники">Винники</option>
+              <option value="Сокільники">Сокільники</option>
+              <option value="Брюховичі">Брюховичі</option>
+              <option value="Рудне / Зимна Вода">Рудне / Зимна Вода</option>
+              <option value="Малехів / Дубляни">Малехів / Дубляни</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label">Вулиця / орієнтир</label>
+          <input id="jobAddress" type="text" class="input-field" placeholder="Напр.: просп. Червоної Калини, біля Іскри" />
+        </div>
+
+        <!-- Умови -->
+        <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:11.5px;">
+          <label style="display:flex;align-items:center;gap:5px;background:var(--bg-input);padding:6px 9px;border-radius:9px;border:1px solid var(--border);cursor:pointer;">
+            <input id="tagDaily" type="checkbox" style="accent-color:var(--amber);" /> 💰 Виплата щодня
+          </label>
+          <label style="display:flex;align-items:center;gap:5px;background:var(--bg-input);padding:6px 9px;border-radius:9px;border:1px solid var(--border);cursor:pointer;">
+            <input id="tagWeekend" type="checkbox" style="accent-color:var(--amber);" /> 📅 На вихідних
+          </label>
+          <label style="display:flex;align-items:center;gap:5px;background:var(--bg-input);padding:6px 9px;border-radius:9px;border:1px solid var(--border);cursor:pointer;">
+            <input id="tagOnetime" type="checkbox" style="accent-color:var(--amber);" /> ⚡ Разова робота
+          </label>
+        </div>
+
+        <!-- Платне просування: ТОП та Термінове -->
+        <div class="stack-sm">
+          <label id="cardOptTop" class="promo-option-card" onclick="togglePromoOption('top')">
+            <div>
+              <div style="font-size:12.5px;font-weight:800;color:var(--amber);">⭐ Вивести в ТОП</div>
+              <div style="font-size:11px;color:var(--text-muted);">Закріплення зверху стрічки та золота рамка</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span id="optTopPriceLabel" style="font-weight:800;font-size:12px;">15 грн</span>
+              <input id="chkOptTop" type="checkbox" onclick="event.stopPropagation();updateJobCostSummary();" style="accent-color:var(--amber);width:16px;height:16px;" />
+            </div>
+          </label>
+
+          <label id="cardOptUrgent" class="promo-option-card" onclick="togglePromoOption('urgent')">
+            <div>
+              <div style="font-size:12.5px;font-weight:800;color:#fb7185;">🔥 Термінове замовлення</div>
+              <div style="font-size:11px;color:var(--text-muted);">Яскрава позначка «Терміново» та пріоритет</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span id="optUrgentPriceLabel" style="font-weight:800;font-size:12px;">10 грн</span>
+              <input id="chkOptUrgent" type="checkbox" onclick="event.stopPropagation();updateJobCostSummary();" style="accent-color:var(--rose);width:16px;height:16px;" />
+            </div>
+          </label>
+        </div>
+
+        <!-- Карта точки -->
+        <div class="stack-sm">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <span class="field-label" style="margin:0;">📍 Точка на карті Львова (клік або перетягніть маркер)</span>
+            <button type="button" onclick="useMyGeo()" class="btn btn-secondary btn-xs" style="flex-shrink:0;">📍 Моя геолокація</button>
+          </div>
+          <div id="pickerMap" class="picker-map-wrapper"></div>
+          <div id="pickedCoordsText" style="font-size:11px;color:var(--text-muted);font-family:monospace;">Координати: 49.8419, 24.0315</div>
+        </div>
+
+        <div>
+          <label class="field-label">Детальний опис умов та вимог *</label>
+          <textarea id="jobDesc" rows="3" class="textarea-field" placeholder="Опишіть обов'язки, вимоги та спосіб виплати..."></textarea>
+        </div>
+
+        <div>
+          <label class="field-label">Промокод (якщо є)</label>
+          <input id="jobPromoInput" oninput="updateJobCostSummary()" type="text" class="input-field" placeholder="Введіть промокод" />
+        </div>
+
+        <div id="jobCostSummary" class="price-summary-box"></div>
+      </div>
+
+      <!-- ЗАКРІПЛЕНИЙ НИЗ ІЗ КНОПКАМИ ПУБЛІКАЦІЇ -->
+      <div class="modal-footer">
+        <div class="grid-2">
+          <button type="button" onclick="closeJobModal()" class="btn btn-secondary">Скасувати</button>
+          <button type="button" onclick="submitJob()" class="btn btn-primary">🚀 Опублікувати пропозицію</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛКА 3: ВІДГУК НА РОБОТУ ==================== -->
+  <div id="applyJobModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">✋ Взятися за роботу</h2>
+        <button onclick="closeApplyJobModal()" class="btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="applyJobSummary" style="background:var(--bg-input);padding:10px 12px;border-radius:12px;font-size:12.5px;"></div>
+        <div>
+          <label class="field-label">Коментар роботодавцю (необов'язково)</label>
+          <textarea id="applyMessageInput" rows="2" class="textarea-field" placeholder="Напр.: Можу вийти вже через 30 хвилин, маю досвід..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="grid-2">
+          <button onclick="closeApplyJobModal()" class="btn btn-secondary">Скасувати</button>
+          <button onclick="confirmApplyToJob()" class="btn btn-emerald">✅ Підтвердити відгук</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛКА 4: ОПЛАТА MONOBANK ==================== -->
+  <div id="monoModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">💳 Оплата Monobank</h2>
+        <button onclick="closeMonoModal()" class="btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:#0a0f1d;border:1px solid var(--border-strong);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;font-size:12.5px;">
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--text-muted);">Код замовлення:</span>
+            <span id="monoOrderCode" style="font-family:monospace;font-weight:900;color:var(--amber);">#LV-1001</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--text-muted);">Послуга:</span>
+            <span id="monoServiceLabel" style="font-weight:700;text-align:right;">Публікація</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="color:var(--text-muted);">До сплати:</span>
+            <span id="monoOrderAmount" style="font-weight:900;color:var(--emerald);font-size:14px;">5 грн</span>
+          </div>
+          <div style="padding-top:8px;border-top:1px solid var(--border);">
+            <span style="color:var(--text-muted);font-size:11.5px;display:block;margin-bottom:5px;">Реквізити Monobank (натисніть скопіювати):</span>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg-input);padding:8px 10px;border-radius:10px;border:1px solid var(--border-strong);">
+              <span id="monoCardDisplay" style="font-family:monospace;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">5375 4112 0000 0000</span>
+              <button type="button" onclick="copyMonoCard()" class="btn btn-primary btn-xs" style="flex-shrink:0;">Копіювати</button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label">📎 Прикріпіть скріншот або PDF-квитанцію Monobank *</label>
+          <input id="receiptFileInput" type="file" accept="image/*,application/pdf" class="input-field" style="padding:8px;" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnSendReceipt" onclick="submitPaymentReceipt()" class="btn btn-emerald btn-full">
+          ✅ Надіслати чек на перевірку
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛКА 5: ПІДТВЕРДЖЕННЯ ДІЇ ==================== -->
+  <div id="confirmDialogModal" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width:340px;text-align:center;">
+      <div class="modal-body" style="align-items:center;">
+        <div style="font-size:28px;">🗑️</div>
+        <h3 id="confirmDialogTitle" class="modal-title" style="text-align:center;">Підтвердження</h3>
+        <p id="confirmDialogText" style="margin:0;font-size:12.5px;color:var(--text-secondary);"></p>
+      </div>
+      <div class="modal-footer">
+        <div class="grid-2">
+          <button onclick="closeConfirmDialog()" class="btn btn-secondary">Скасувати</button>
+          <button id="confirmDialogYesBtn" class="btn btn-danger">Так, видалити</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛКА 6: СЕКРЕТНИЙ ВХІД В АДМІНКУ (PIN) ==================== -->
+  <div id="adminPinModal" class="modal-overlay hidden">
+    <div id="adminPinBox" class="modal-card" style="max-width:320px;text-align:center;">
+      <div class="modal-body" style="align-items:center;">
+        <div style="width:44px;height:44px;border-radius:14px;background:rgba(251,191,36,0.15);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:20px;">🔐</div>
+        <h3 class="modal-title" style="text-align:center;">Доступ власника</h3>
+        <p style="margin:0;font-size:12px;color:var(--text-muted);">Введіть секретний PIN-код адмін-панелі</p>
+        <input id="adminPinInput" type="password" inputmode="numeric" maxlength="8" placeholder="••••"
+          class="input-field" style="text-align:center;font-size:18px;letter-spacing:0.25em;font-weight:800;" />
+        <p id="adminPinError" class="hidden" style="margin:0;font-size:12px;color:var(--rose);font-weight:700;">Невірний PIN-код</p>
+      </div>
+      <div class="modal-footer">
+        <div class="grid-2">
+          <button onclick="closeAdminPinModal()" class="btn btn-secondary">Скасувати</button>
+          <button onclick="verifyAdminPin()" class="btn btn-primary">Увійти</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛКА 7: ПОДІЛИТИСЯ ВАКАНСІЄЮ В TELEGRAM ==================== -->
+  <div id="shareJobModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">📤 Поділитися вакансією</h2>
+        <button onclick="closeShareJobModal()" class="btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin:0;font-size:12px;color:var(--text-secondary);">
+          Готове оголошення для львівських Telegram-груп і чатів підробітку:
+        </p>
+        <div id="shareJobPreviewText" class="share-preview-box"></div>
+      </div>
+      <div class="modal-footer">
+        <div class="grid-2">
+          <button type="button" onclick="copyShareJobText()" class="btn btn-secondary">📋 Скопіювати текст</button>
+          <a id="shareJobTgDirectLink" href="https://t.me/yerobota_bot" target="_blank" class="btn btn-sky">📨 В Telegram</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== МОДАЛКА 8: ВЗАЄМНИЙ РЕЙТИНГ ТА ВІДГУК ==================== -->
+  <div id="ratingModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="ratingModalTitle" class="modal-title">⭐ Оцінити співпрацю</h2>
+        <button onclick="closeRatingModal()" class="btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="ratingTargetInfo" style="background:var(--bg-input);padding:10px 12px;border-radius:12px;font-size:12.5px;"></div>
+
+        <div>
+          <label class="field-label" style="text-align:center;">Оберіть оцінку від 1 до 5 зірок:</label>
+          <div class="star-picker-row">
+            <button type="button" onclick="setRatingStars(1)" class="star-btn active" data-star="1">★</button>
+            <button type="button" onclick="setRatingStars(2)" class="star-btn active" data-star="2">★</button>
+            <button type="button" onclick="setRatingStars(3)" class="star-btn active" data-star="3">★</button>
+            <button type="button" onclick="setRatingStars(4)" class="star-btn active" data-star="4">★</button>
+            <button type="button" onclick="setRatingStars(5)" class="star-btn active" data-star="5">★</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="field-label">Короткий відгук (необов'язково)</label>
+          <textarea id="ratingCommentInput" rows="2" class="textarea-field" placeholder="Напр.: Все виконано вчасно, чітка оплата, рекомендую!"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="grid-2">
+          <button type="button" onclick="closeRatingModal()" class="btn btn-secondary">Скасувати</button>
+          <button type="button" onclick="submitMutualRating()" class="btn btn-primary">⭐ Надіслати оцінку</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== КОНФІГУРАЦІЯ ТА FIREBASE ====================
+    const APP_VERSION = 'v2.6 • Підробіток.Львів';
+    const BOT_SHARE_URL = 'https://t.me/yerobota_bot';
+    const LIVE_FIREBASE_URL = 'https://yerobotalviv-default-rtdb.europe-west1.firebasedatabase.app';
+    const AUTO_DELETE_DELAY_MS = 15 * 60 * 1000;
+    const FETCH_TIMEOUT_MS = 6000;
+
+    // Координати районів Львова та передмість для карти OpenStreetMap
+    const LVIV_DISTRICTS_GEO = [
+      { name: 'Галицький / Центр', lat: 49.8419, lng: 24.0315 },
+      { name: 'Сихівський', lat: 49.7946, lng: 24.0488 },
+      { name: 'Франківський', lat: 49.8115, lng: 23.9961 },
+      { name: 'Шевченківський', lat: 49.8655, lng: 24.0185 },
+      { name: 'Личаківський', lat: 49.8355, lng: 24.0680 },
+      { name: 'Залізничний', lat: 49.8385, lng: 23.9720 },
+      { name: 'Винники', lat: 49.8152, lng: 24.1394 },
+      { name: 'Сокільники', lat: 49.7764, lng: 23.9875 },
+      { name: 'Брюховичі', lat: 49.9022, lng: 23.9465 },
+      { name: 'Рудне / Зимна Вода', lat: 49.8350, lng: 23.8820 },
+      { name: 'Малехів / Дубляни', lat: 49.8935, lng: 24.0850 }
+    ];
+
+    const DEFAULT_CONFIG = {
+      botToken: '9162674850:AAFGB1SnS1b1krvD1apvjXdh1G3Bv',
+      adminChatId: '668227669',
+      ownerIds: ['668227669'],
+      adminPin: '7777',
+      monoCard: '5375 4112 0000 0000',
+      price: 5,
+      topPrice: 15,
+      urgentPrice: 10,
+      freeLimit: 1,
+      promos: ['LVIV2026', 'START'],
+      firebaseUrl: LIVE_FIREBASE_URL
+    };
+
+    function safeReadLS(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    }
+
+    let config = { ...DEFAULT_CONFIG, ...safeReadLS('pl_config', {}) };
+    if (!config.firebaseUrl) config.firebaseUrl = LIVE_FIREBASE_URL;
+
+    let jobs = safeReadLS('pl_jobs', []);
+    let payments = safeReadLS('pl_payments', []);
+    let usersDb = safeReadLS('pl_users_db', []);
+    let applications = safeReadLS('pl_applications', []);
+    let reviewsDb = safeReadLS('pl_reviews', []);
+    let savedJobIds = safeReadLS('pl_saved', []);
+    let syncQueue = safeReadLS('pl_sync_queue', []);
+
+    let currentTag = 'all';
+    let currentJobsView = 'list';
+    let pendingOrder = null;
+    let pendingAfterRegAction = null;
+    let activeApplyJobId = null;
+    let activeShareText = '';
+    let activeRatingContext = null;
+    let selectedStarScore = 5;
+    let jobFormNeededCount = 1;
+    let pickedCoords = [49.8419, 24.0315];
+    let mainMap = null;
+    let mainMarkersLayer = null;
+    let pickerMap = null;
+    let pickerMarker = null;
+    let isFirebaseSyncing = false;
+    let isFlushingQueue = false;
+    let confirmCallback = null;
+
+    // Ініціалізація Telegram WebApp та адаптація висоти екрану
+    const tg = window.Telegram?.WebApp;
+    function syncAppViewportHeight() {
+      const vh = (tg && tg.viewportStableHeight) ? `${tg.viewportStableHeight}px` : `${window.innerHeight}px`;
+      document.documentElement.style.setProperty('--app-vh', vh);
+    }
+    syncAppViewportHeight();
+    window.addEventListener('resize', syncAppViewportHeight);
+
+    if (tg) {
+      try {
+        tg.ready();
+        tg.expand();
+        if (typeof tg.onEvent === 'function') {
+          tg.onEvent('viewportChanged', syncAppViewportHeight);
+        }
+      } catch (e) {}
+    }
+    const tgUser = tg?.initDataUnsafe?.user;
+
+    let currentUser = safeReadLS('pl_user', null) || {
+      id: tgUser?.id ? String(tgUser.id) : 'usr_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      name: tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') : '',
+      username: tgUser?.username ? '@' + tgUser.username : '',
+      phone: '',
+      role: 'employer',
+      district: 'Галицький / Центр',
+      spec: '',
+      isFree: true,
+      isRegistered: false,
+      rating: 5.0,
+      reviewsCount: 0
+    };
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function resetModalScroll(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      const body = modal.querySelector('.modal-body');
+      if (body) body.scrollTop = 0;
+    }
+
+    // ==================== СПОВІЩЕННЯ (TOASTS ПО ЦЕНТРУ ЕКРАНУ) ====================
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      const el = document.createElement('div');
+      el.className = `toast-item ${type}`;
+      el.innerHTML = `<span>${escapeHtml(message)}</span>`;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(-6px)';
+        el.style.transition = 'all 0.2s ease';
+        setTimeout(() => el.remove(), 220);
+      }, 3200);
+    }
+
+    function openConfirmDialog(title, text, yesLabel, onConfirm) {
+      document.getElementById('confirmDialogTitle').textContent = title;
+      document.getElementById('confirmDialogText').textContent = text;
+      const yesBtn = document.getElementById('confirmDialogYesBtn');
+      yesBtn.textContent = yesLabel || 'Підтвердити';
+      confirmCallback = onConfirm;
+      yesBtn.onclick = () => {
+        const cb = confirmCallback;
+        closeConfirmDialog();
+        if (typeof cb === 'function') cb();
+      };
+      document.getElementById('confirmDialogModal').classList.remove('hidden');
+      resetModalScroll('confirmDialogModal');
+    }
+
+    function closeConfirmDialog() {
+      document.getElementById('confirmDialogModal').classList.add('hidden');
+      confirmCallback = null;
+    }
+
+    // ==================== ТИХА СИНХРОНІЗАЦІЯ З FIREBASE ====================
+    function updateSyncTimestampUI() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      document.querySelectorAll('.last-sync-label').forEach(el => {
+        el.textContent = `Оновлено: ${hh}:${mm}:${ss}`;
+      });
+    }
+
+    async function safeFetchWithTimeout(url, options = {}, timeoutMs = FETCH_TIMEOUT_MS) {
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        return { ok: false, response: null };
+      }
+      const controller = new AbortController();
+      const timerId = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(timerId);
+        return { ok: response.ok, response };
+      } catch (err) {
+        clearTimeout(timerId);
+        return { ok: false, response: null };
+      }
+    }
+
+    function saveSyncQueue() {
+      try {
+        localStorage.setItem('pl_sync_queue', JSON.stringify(syncQueue));
+      } catch (e) {}
+    }
+
+    function enqueueSyncOperation(path, method, data) {
+      syncQueue = syncQueue.filter(item => item.path !== path);
+      syncQueue.push({
+        id: 'sq_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        path,
+        method,
+        data: data === undefined ? null : data
+      });
+      saveSyncQueue();
+    }
+
+    async function flushSyncQueue() {
+      if (isFlushingQueue || !syncQueue.length) return true;
+      if (typeof navigator !== 'undefined' && !navigator.onLine) return false;
+
+      const base = (config.firebaseUrl || LIVE_FIREBASE_URL).replace(/\/$/, '');
+      if (!base) return false;
+
+      isFlushingQueue = true;
+      try {
+        const snapshot = [...syncQueue];
+        for (const item of snapshot) {
+          const fetchOpts = item.method === 'DELETE'
+            ? { method: 'DELETE' }
+            : {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(item.data)
+              };
+
+          const result = await safeFetchWithTimeout(`${base}${item.path}`, fetchOpts, FETCH_TIMEOUT_MS);
+          if (result.ok) {
+            syncQueue = syncQueue.filter(q => q.id !== item.id);
+            saveSyncQueue();
+          }
+        }
+      } catch (e) {
+      } finally {
+        isFlushingQueue = false;
+      }
+      return syncQueue.length === 0;
+    }
+
+    async function fbPutEntity(collection, id, data) {
+      const path = `/${collection}/${id}.json`;
+      const base = (config.firebaseUrl || LIVE_FIREBASE_URL).replace(/\/$/, '');
+      if (!base) return false;
+
+      const res = await safeFetchWithTimeout(`${base}${path}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (!res.ok) {
+        enqueueSyncOperation(path, 'PUT', data);
+        return false;
+      }
+      updateSyncTimestampUI();
+      return true;
+    }
+
+    async function fbDeleteEntity(collection, id) {
+      const path = `/${collection}/${id}.json`;
+      const base = (config.firebaseUrl || LIVE_FIREBASE_URL).replace(/\/$/, '');
+      if (!base) return false;
+
+      const res = await safeFetchWithTimeout(`${base}${path}`, { method: 'DELETE' });
+      if (!res.ok) {
+        enqueueSyncOperation(path, 'DELETE', null);
+        return false;
+      }
+      updateSyncTimestampUI();
+      return true;
+    }
+
+    async function fbPutConfig(cfgData) {
+      const path = '/config.json';
+      const base = (config.firebaseUrl || LIVE_FIREBASE_URL).replace(/\/$/, '');
+      if (!base) return false;
+
+      const res = await safeFetchWithTimeout(`${base}${path}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cfgData)
+      });
+
+      if (!res.ok) {
+        enqueueSyncOperation(path, 'PUT', cfgData);
+        return false;
+      }
+      updateSyncTimestampUI();
+      return true;
+    }
+
+    function firebaseMapToArray(obj) {
+      if (!obj || typeof obj !== 'object') return [];
+      return Object.keys(obj)
+        .filter(k => obj[k] && typeof obj[k] === 'object')
+        .map(k => ({ id: k, ...obj[k] }));
+    }
+
+    function upsertCurrentUserInDb() {
+      if (!currentUser.isRegistered) return;
+      const idx = usersDb.findIndex(u => String(u.id) === String(currentUser.id));
+      if (idx >= 0) {
+        usersDb[idx] = { ...usersDb[idx], ...currentUser };
+      } else {
+        usersDb.push({ ...currentUser });
+      }
+    }
+
+    function saveAllState() {
+      upsertCurrentUserInDb();
+      try {
+        localStorage.setItem('pl_config', JSON.stringify(config));
+        localStorage.setItem('pl_jobs', JSON.stringify(jobs));
+        localStorage.setItem('pl_payments', JSON.stringify(payments));
+        localStorage.setItem('pl_users_db', JSON.stringify(usersDb));
+        localStorage.setItem('pl_applications', JSON.stringify(applications));
+        localStorage.setItem('pl_reviews', JSON.stringify(reviewsDb));
+        localStorage.setItem('pl_saved', JSON.stringify(savedJobIds));
+        localStorage.setItem('pl_user', JSON.stringify(currentUser));
+      } catch (e) {}
+    }
+
+    async function manualSyncNow() {
+      await flushSyncQueue();
+      await loadFromFirebase(false);
+      showToast('✅ Дані оновлено!', 'success');
+    }
+
+    async function loadFromFirebase(silent = true) {
+      const base = (config.firebaseUrl || LIVE_FIREBASE_URL).replace(/\/$/, '');
+      if (!base || isFirebaseSyncing) return;
+
+      isFirebaseSyncing = true;
+      try {
+        if (syncQueue.length > 0) {
+          await flushSyncQueue();
+        }
+
+        const [jobsRes, usersRes, paymentsRes, appsRes, reviewsRes, cfgRes] = await Promise.all([
+          safeFetchWithTimeout(`${base}/jobs.json`),
+          safeFetchWithTimeout(`${base}/users.json`),
+          safeFetchWithTimeout(`${base}/payments.json`),
+          safeFetchWithTimeout(`${base}/applications.json`),
+          safeFetchWithTimeout(`${base}/reviews.json`),
+          safeFetchWithTimeout(`${base}/config.json`)
+        ]);
+
+        if (!jobsRes.ok) return;
+
+        const [jobsRaw, usersRaw, paymentsRaw, appsRaw, reviewsRaw, cfgRaw] = await Promise.all([
+          jobsRes.response.json(),
+          usersRes.ok ? usersRes.response.json() : null,
+          paymentsRes.ok ? paymentsRes.response.json() : null,
+          appsRes.ok ? appsRes.response.json() : null,
+          reviewsRes.ok ? reviewsRes.response.json() : null,
+          cfgRes.ok ? cfgRes.response.json() : null
+        ]);
+
+        jobs = firebaseMapToArray(jobsRaw).map(j => ({
+          ...j,
+          neededWorkers: Math.max(1, Number(j.neededWorkers || j.peopleNeeded || 1)),
+          hiredWorkers: Math.max(0, Number(j.hiredWorkers || j.peopleHired || 0)),
+          filledAt: j.filledAt || null
+        }));
+
+        usersDb = firebaseMapToArray(usersRaw);
+        reviewsDb = firebaseMapToArray(reviewsRaw).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+        if (currentUser.isRegistered) {
+          const remoteMe = usersDb.find(u => String(u.id) === String(currentUser.id));
+          if (remoteMe) {
+            currentUser.rating = Number(remoteMe.rating ?? currentUser.rating);
+            currentUser.reviewsCount = Number(remoteMe.reviewsCount ?? currentUser.reviewsCount);
+          } else {
+            upsertCurrentUserInDb();
+            fbPutEntity('users', currentUser.id, currentUser);
+          }
+        }
+
+        payments = firebaseMapToArray(paymentsRaw).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        applications = firebaseMapToArray(appsRaw).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+        if (cfgRaw && typeof cfgRaw === 'object') {
+          if (cfgRaw.monoCard) config.monoCard = cfgRaw.monoCard;
+          if (cfgRaw.price !== undefined) config.price = Number(cfgRaw.price);
+          if (cfgRaw.topPrice !== undefined) config.topPrice = Number(cfgRaw.topPrice);
+          if (cfgRaw.urgentPrice !== undefined) config.urgentPrice = Number(cfgRaw.urgentPrice);
+          if (cfgRaw.freeLimit !== undefined) config.freeLimit = Number(cfgRaw.freeLimit);
+          if (Array.isArray(cfgRaw.promos)) config.promos = cfgRaw.promos;
+          if (Array.isArray(cfgRaw.ownerIds)) config.ownerIds = cfgRaw.ownerIds;
+        }
+
+        cleanupExpiredFilledJobs(true);
+        saveAllState();
+        updateSyncTimestampUI();
+
+        updateHeaderUI();
+        renderJobs();
+        if (currentJobsView === 'map') refreshMainMapMarkers();
+        renderWorkers();
+        renderCabinet();
+        if (!document.getElementById('tab-admin').classList.contains('hidden')) {
+          renderAdminData();
+        }
+      } catch (e) {
+      } finally {
+        isFirebaseSyncing = false;
+      }
+    }
+
+    window.addEventListener('online', async () => {
+      await flushSyncQueue();
+      await loadFromFirebase(true);
+    });
+
+    // ==================== АВТОВИДАЛЕННЯ ЧЕРЕЗ 15 ХВ ПІСЛЯ ПОВНОГО НАБОРУ ====================
+    function formatRemainingCountdown(filledAt) {
+      if (!filledAt) return '15:00';
+      const remainingMs = Math.max(0, (Number(filledAt) + AUTO_DELETE_DELAY_MS) - Date.now());
+      const totalSec = Math.ceil(remainingMs / 1000);
+      const mins = String(Math.floor(totalSec / 60)).padStart(2, '0');
+      const secs = String(totalSec % 60).padStart(2, '0');
+      return `${mins}:${secs}`;
+    }
+
+    function cleanupExpiredFilledJobs(silent = false) {
+      const now = Date.now();
+      const expired = jobs.filter(j => {
+        const needed = Math.max(1, Number(j.neededWorkers || 1));
+        const hired = Math.max(0, Number(j.hiredWorkers || 0));
+        return hired >= needed && j.filledAt && (now - Number(j.filledAt) >= AUTO_DELETE_DELAY_MS);
+      });
+
+      if (!expired.length) return;
+      const expiredIds = new Set(expired.map(j => j.id));
+      jobs = jobs.filter(j => !expiredIds.has(j.id));
+      saveAllState();
+      expired.forEach(j => fbDeleteEntity('jobs', j.id));
+
+      renderJobs();
+      if (currentJobsView === 'map') refreshMainMapMarkers();
+      renderCabinet();
+      if (!silent) {
+        showToast('⏱️ Вакансію з повним набором виконавців автоматично видалено через 15 хв.', 'info');
+      }
+    }
+
+    setInterval(() => {
+      cleanupExpiredFilledJobs(false);
+      document.querySelectorAll('.job-countdown-timer').forEach(el => {
+        const filledAt = Number(el.dataset.filledAt || 0);
+        if (filledAt) {
+          el.textContent = formatRemainingCountdown(filledAt);
+        }
+      });
+    }, 1000);
+
+    // ==================== ПРИХОВАНИЙ ВХІД В АДМІНКУ (5 КЛІКІВ + ID + PIN) ====================
+    let logoTapCount = 0;
+    let logoTapTimer = null;
+
+    document.getElementById('secretLogoTrigger').addEventListener('click', () => {
+      logoTapCount++;
+      clearTimeout(logoTapTimer);
+      if (logoTapCount >= 5) {
+        logoTapCount = 0;
+        triggerSecretAdminLogin();
+      } else {
+        logoTapTimer = setTimeout(() => { logoTapCount = 0; }, 1500);
+      }
+    });
+
+    function triggerSecretAdminLogin() {
+      if (tgUser?.id) {
+        const allowed = (config.ownerIds || []).map(String);
+        if (!allowed.includes(String(tgUser.id))) {
+          return;
+        }
+      }
+      document.getElementById('adminPinInput').value = '';
+      document.getElementById('adminPinError').classList.add('hidden');
+      document.getElementById('adminPinModal').classList.remove('hidden');
+      resetModalScroll('adminPinModal');
+      setTimeout(() => document.getElementById('adminPinInput').focus(), 120);
+    }
+
+    function closeAdminPinModal() {
+      document.getElementById('adminPinModal').classList.add('hidden');
+    }
+
+    function verifyAdminPin() {
+      const entered = document.getElementById('adminPinInput').value.trim();
+      if (entered === String(config.adminPin)) {
+        closeAdminPinModal();
+        openAdminPanel();
+      } else {
+        const box = document.getElementById('adminPinBox');
+        document.getElementById('adminPinError').classList.remove('hidden');
+        box.classList.remove('animate-shake');
+        void box.offsetWidth;
+        box.classList.add('animate-shake');
+      }
+    }
+
+    document.getElementById('adminPinInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') verifyAdminPin();
+    });
+
+    function openAdminPanel() {
+      document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+      document.getElementById('tab-admin').classList.remove('hidden');
+      loadAdminFields();
+      renderAdminData();
+    }
+
+    function exitAdmin() {
+      switchTab('jobs');
+    }
+
+    // ==================== ОБОВ'ЯЗКОВА РЕЄСТРАЦІЯ ====================
+    let selectedRegRole = 'employer';
+
+    function openRegistrationModal(defaultRole = 'employer', afterAction = null) {
+      pendingAfterRegAction = afterAction;
+      selectedRegRole = defaultRole;
+      document.getElementById('regName').value = currentUser.name || '';
+      document.getElementById('regPhone').value = currentUser.phone || '';
+      document.getElementById('regUsername').value = currentUser.username || '';
+      document.getElementById('regDistrict').value = currentUser.district || 'Галицький / Центр';
+      document.getElementById('regSpec').value = currentUser.spec || '';
+      selectRegRole(defaultRole);
+      document.getElementById('registrationModal').classList.remove('hidden');
+      resetModalScroll('registrationModal');
+    }
+
+    function closeRegistrationModal() {
+      document.getElementById('registrationModal').classList.add('hidden');
+      pendingAfterRegAction = null;
+    }
+
+    function selectRegRole(role) {
+      selectedRegRole = role;
+      const empBtn = document.getElementById('regRoleEmployer');
+      const wrkBtn = document.getElementById('regRoleWorker');
+      const specGroup = document.getElementById('regSpecGroup');
+
+      if (role === 'employer') {
+        empBtn.classList.add('active');
+        wrkBtn.classList.remove('active');
+        specGroup.classList.add('hidden');
+      } else {
+        wrkBtn.classList.add('active');
+        empBtn.classList.remove('active');
+        specGroup.classList.remove('hidden');
+      }
+    }
+
+    function completeRegistration() {
+      const name = document.getElementById('regName').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const username = document.getElementById('regUsername').value.trim();
+      const district = document.getElementById('regDistrict').value;
+      const spec = document.getElementById('regSpec').value.trim();
+
+      if (!name || !phone) {
+        showToast('⚠️ Вкажіть ім’я та номер телефону для реєстрації!', 'error');
+        return;
+      }
+      if (selectedRegRole === 'worker' && !spec) {
+        showToast('⚠️ Вкажіть вашу спеціалізацію виконавця!', 'error');
+        return;
+      }
+
+      currentUser = {
+        ...currentUser,
+        name,
+        phone,
+        username: username ? (username.startsWith('@') ? username : '@' + username) : '',
+        district,
+        spec: spec || 'Універсальний помічник',
+        role: selectedRegRole,
+        isFree: true,
+        isRegistered: true,
+        rating: currentUser.rating || 5.0,
+        reviewsCount: currentUser.reviewsCount || 0
+      };
+
+      saveAllState();
+      fbPutEntity('users', currentUser.id, currentUser);
+
+      const nextAction = pendingAfterRegAction;
+      closeRegistrationModal();
+      updateHeaderUI();
+      renderJobs();
+      renderWorkers();
+      renderCabinet();
+      showToast(`✅ Реєстрацію завершено! Вітаємо, ${currentUser.name}`, 'success');
+
+      if (typeof nextAction === 'function') {
+        setTimeout(() => nextAction(), 180);
+      }
+    }
+
+    // ==================== НАВІГАЦІЯ ТА КАБІНЕТ ====================
+    function updateHeaderUI() {
+      const nameEl = document.getElementById('headerUserName');
+      const iconEl = document.getElementById('headerRoleIcon');
+      document.getElementById('savedCount').textContent = savedJobIds.length;
+
+      if (!currentUser.isRegistered) {
+        iconEl.textContent = '🔒';
+        nameEl.textContent = 'Гість';
+      } else {
+        iconEl.textContent = currentUser.role === 'employer' ? '💼' : '👷';
+        nameEl.textContent = currentUser.name;
+      }
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      const activeNav = document.getElementById(`nav-${tabName}`);
+      if (activeNav) activeNav.classList.add('active');
+
+      if (tabName === 'jobs') {
+        renderJobs();
+        if (currentJobsView === 'map') initMainMap();
+      }
+      if (tabName === 'workers') renderWorkers();
+      if (tabName === 'cabinet') renderCabinet();
+    }
+
+    function setUserRole(role) {
+      currentUser.role = role;
+      saveAllState();
+      fbPutEntity('users', currentUser.id, currentUser);
+      updateHeaderUI();
+      renderCabinet();
+      renderWorkers();
+    }
+
+    function toggleEditProfile() {
+      const form = document.getElementById('editProfileForm');
+      form.classList.toggle('hidden');
+      document.getElementById('profName').value = currentUser.name;
+      document.getElementById('profPhone').value = currentUser.phone || '';
+      document.getElementById('profUsername').value = currentUser.username || '';
+      document.getElementById('profDistrict').value = currentUser.district || 'Галицький / Центр';
+      document.getElementById('profSpec').value = currentUser.spec || '';
+      document.getElementById('profIsFree').checked = currentUser.isFree !== false;
+    }
+
+    function saveProfile() {
+      const name = document.getElementById('profName').value.trim();
+      const phone = document.getElementById('profPhone').value.trim();
+      if (!name || !phone) {
+        showToast('⚠️ Ім’я та телефон є обов’язковими!', 'error');
+        return;
+      }
+      currentUser.name = name;
+      currentUser.phone = phone;
+      const u = document.getElementById('profUsername').value.trim();
+      currentUser.username = u ? (u.startsWith('@') ? u : '@' + u) : '';
+      currentUser.district = document.getElementById('profDistrict').value;
+      currentUser.spec = document.getElementById('profSpec').value.trim();
+      currentUser.isFree = document.getElementById('profIsFree').checked;
+
+      saveAllState();
+      fbPutEntity('users', currentUser.id, currentUser);
+      updateHeaderUI();
+      renderCabinet();
+      renderWorkers();
+      document.getElementById('editProfileForm').classList.add('hidden');
+      showToast('✅ Профіль збережено!', 'success');
+    }
+
+    function renderCabinet() {
+      const guestBanner = document.getElementById('guestRegisterBanner');
+      const profCard = document.getElementById('registeredProfileCard');
+      const empBlock = document.getElementById('employerCabinetBlock');
+      const empAppsBlock = document.getElementById('employerAppsBlock');
+      const wrkAppsBlock = document.getElementById('workerAppsBlock');
+      const myReviewsBlock = document.getElementById('myReviewsBlock');
+
+      if (!currentUser.isRegistered) {
+        guestBanner.classList.remove('hidden');
+        profCard.classList.add('hidden');
+        empBlock.classList.add('hidden');
+        empAppsBlock.classList.add('hidden');
+        wrkAppsBlock.classList.add('hidden');
+        myReviewsBlock.classList.add('hidden');
+        return;
+      }
+
+      guestBanner.classList.add('hidden');
+      profCard.classList.remove('hidden');
+      empBlock.classList.remove('hidden');
+      empAppsBlock.classList.remove('hidden');
+      wrkAppsBlock.classList.remove('hidden');
+      myReviewsBlock.classList.remove('hidden');
+
+      document.getElementById('cabUserName').textContent = currentUser.name;
+      document.getElementById('cabRatingBadge').textContent = `★ ${Number(currentUser.rating || 5).toFixed(1)} (${currentUser.reviewsCount || 0})`;
+      document.getElementById('cabUserMeta').textContent = `${currentUser.role === 'employer' ? 'Роботодавець' : 'Виконавець'} • ${currentUser.district} • ${currentUser.phone}`;
+
+      const empBtn = document.getElementById('roleBtnEmployer');
+      const wrkBtn = document.getElementById('roleBtnWorker');
+      if (currentUser.role === 'employer') {
+        empBtn.classList.add('active');
+        wrkBtn.classList.remove('active');
+      } else {
+        wrkBtn.classList.add('active');
+        empBtn.classList.remove('active');
+      }
+
+      const myCount = jobs.filter(j => String(j.ownerId) === String(currentUser.id)).length;
+      const leftFree = Math.max(0, Number(config.freeLimit) - myCount);
+      document.getElementById('freeLimitBadge').textContent = `Безкоштовний ліміт: ${leftFree}`;
+
+      renderMyJobs();
+      renderEmployerApplications();
+      renderMyApplications();
+      renderMyReceivedReviews();
+    }
+
+    // ==================== ВАКАНСІЇ ТА СПИСОК ====================
+    function setTagFilter(tag) {
+      currentTag = tag;
+      document.querySelectorAll('.tags-scroll .tag-chip[data-tag]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tag === tag);
+      });
+      renderJobs();
+      if (currentJobsView === 'map') initMainMap();
+    }
+
+    function setJobsView(view) {
+      currentJobsView = view;
+      const listEl = document.getElementById('jobsListContainer');
+      const mapEl = document.getElementById('jobsMapContainer');
+      const btnList = document.getElementById('btnViewList');
+      const btnMap = document.getElementById('btnViewMap');
+
+      if (view === 'list') {
+        listEl.classList.remove('hidden');
+        mapEl.classList.add('hidden');
+        btnList.classList.add('active');
+        btnMap.classList.remove('active');
+      } else {
+        listEl.classList.add('hidden');
+        mapEl.classList.remove('hidden');
+        btnMap.classList.add('active');
+        btnList.classList.remove('active');
+        initMainMap();
+      }
+    }
+
+    function getFilteredJobs() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      const dist = document.getElementById('districtFilter').value;
+      const cat = document.getElementById('categoryFilter').value;
+      const sort = document.getElementById('sortFilter').value;
+
+      let list = jobs.filter(j => j.status === 'active');
+
+      if (q) {
+        list = list.filter(j =>
+          (j.title || '').toLowerCase().includes(q) ||
+          (j.address || '').toLowerCase().includes(q) ||
+          (j.desc || '').toLowerCase().includes(q) ||
+          (j.pay || '').toLowerCase().includes(q)
+        );
+      }
+      if (dist) list = list.filter(j => j.district === dist);
+      if (cat) list = list.filter(j => j.category === cat);
+      if (currentTag === 'saved') list = list.filter(j => savedJobIds.includes(j.id));
+      else if (currentTag !== 'all') list = list.filter(j => (j.tags || []).includes(currentTag));
+
+      if (sort === 'urgent') {
+        list.sort((a, b) => ((b.isUrgent || (b.tags || []).includes('urgent')) ? 1 : 0) - ((a.isUrgent || (a.tags || []).includes('urgent')) ? 1 : 0) || (b.createdAt || 0) - (a.createdAt || 0));
+      } else {
+        list.sort((a, b) => (b.isTop ? 1 : 0) - (a.isTop ? 1 : 0) || (b.createdAt || 0) - (a.createdAt || 0));
+      }
+      return list;
+    }
+
+    function renderJobs() {
+      const list = getFilteredJobs();
+      const container = document.getElementById('jobsListContainer');
+
+      if (!list.length) {
+        container.innerHTML = `
+          <div class="card" style="text-align:center;padding:28px 16px;">
+            <div style="font-size:32px;margin-bottom:8px;">🔍</div>
+            <h3 style="margin:0 0 6px;font-size:15px;font-weight:800;">Стрічка вакансій Львова поки порожня</h3>
+            <p style="margin:0 0 12px;font-size:12.5px;color:var(--text-muted);">
+              Зареєструйтеся як роботодавець і виставте першу пропозицію роботи з кількістю потрібних людей.
+            </p>
+            <button onclick="handleOpenJobCreate()" class="btn btn-primary btn-sm">+ Виставити пропозицію</button>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = list.map(job => {
+        const isSaved = savedJobIds.includes(job.id);
+        const needed = Math.max(1, Number(job.neededWorkers || 1));
+        const hired = Math.max(0, Number(job.hiredWorkers || 0));
+        const left = Math.max(0, needed - hired);
+        const pct = Math.min(100, Math.round((hired / needed) * 100));
+        const isFull = hired >= needed;
+        const isUrgent = Boolean(job.isUrgent) || (job.tags || []).includes('urgent');
+        const alreadyApplied = applications.some(a => a.jobId === job.id && String(a.workerId) === String(currentUser.id));
+        const isMyOwnJob = String(job.ownerId) === String(currentUser.id);
+
+        const tgLink = job.contactUsername
+          ? `https://t.me/${escapeHtml(job.contactUsername.replace('@', ''))}`
+          : null;
+
+        const ownerRecord = usersDb.find(u => String(u.id) === String(job.ownerId));
+        const displayOwnerRating = Number(ownerRecord?.rating ?? job.ownerRating ?? 5).toFixed(1);
+        const displayOwnerReviews = Number(ownerRecord?.reviewsCount ?? 0);
+
+        let actionAreaHtml = '';
+        if (!currentUser.isRegistered) {
+          actionAreaHtml = `
+            <div class="locked-contact-box">
+              <span>🔒 Зареєструйтеся як виконавець, щоб взятися за роботу та бачити контакти</span>
+              <button onclick="openRegistrationModal('worker', () => openApplyJobModal('${job.id}'))" class="btn btn-primary btn-xs" style="flex-shrink:0;">
+                Реєстрація
+              </button>
+            </div>`;
+        } else if (isMyOwnJob) {
+          actionAreaHtml = `
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span class="pill-badge pill-sky">Ваша вакансія</span>
+              <button onclick="switchTab('cabinet')" class="btn btn-secondary btn-xs">Керувати</button>
+            </div>`;
+        } else {
+          actionAreaHtml = `
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              ${job.contactPhone ? `<a href="tel:${escapeHtml(job.contactPhone)}" class="btn btn-secondary btn-xs">📞 ${escapeHtml(job.contactPhone)}</a>` : ''}
+              ${tgLink ? `<a href="${tgLink}" target="_blank" class="btn btn-sky btn-xs">💬 Telegram</a>` : ''}
+              ${isFull
+                ? `<span class="pill-badge pill-emerald">✅ Команду набрано</span>`
+                : alreadyApplied
+                  ? `<span class="pill-badge pill-emerald">✓ Ви відгукнулися</span>`
+                  : `<button onclick="openApplyJobModal('${job.id}')" class="btn btn-emerald btn-xs">✋ Взятися за роботу</button>`
+              }
+            </div>`;
+        }
+
+        return `
+          <article class="job-card ${job.isTop ? 'is-top' : ''}">
+            <div class="job-card-header">
+              <div>
+                <div class="job-badges">
+                  ${job.isTop ? '<span class="badge-top">⭐ ТОП</span>' : ''}
+                  ${isUrgent ? '<span class="badge-urgent">🔥 ТЕРМІНОВО</span>' : ''}
+                  <span class="badge-cat">${escapeHtml(job.category)}</span>
+                  <span class="badge-district">📍 ${escapeHtml(job.district)}</span>
+                </div>
+                <h3 class="job-title">${escapeHtml(job.title)}</h3>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                <button onclick="openShareJobModal('${job.id}')" class="btn-save-heart" title="Поділитися в Telegram">
+                  📤
+                </button>
+                <button onclick="toggleSaveJob('${job.id}')" class="btn-save-heart" title="Зберегти">
+                  ${isSaved ? '❤️' : '🤍'}
+                </button>
+              </div>
+            </div>
+
+            <div class="job-pay-row">
+              <span class="pay-tag">💰 ${escapeHtml(job.pay)}</span>
+              ${job.schedule ? `<span class="schedule-tag">🕒 ${escapeHtml(job.schedule)}</span>` : ''}
+            </div>
+
+            <!-- Прогрес набору виконавців -->
+            <div class="hiring-box">
+              <div class="hiring-top">
+                <span style="color:${isFull ? '#34d399' : 'var(--amber)'};">
+                  ${isFull ? `✅ Набрано ${hired} з ${needed}` : `👥 Є ${hired} з ${needed} • Треба ще ${left}`}
+                </span>
+                <span style="color:var(--text-muted);">${pct}%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" style="width:${pct}%;"></div>
+              </div>
+            </div>
+
+            ${isFull ? `
+              <div class="countdown-banner">
+                <span>⏳ Люди набрані! Автовидалення оголошення через:</span>
+                <span class="job-countdown-timer" data-filled-at="${job.filledAt || Date.now()}" style="font-family:monospace;font-size:13px;font-weight:900;">
+                  ${formatRemainingCountdown(job.filledAt)}
+                </span>
+              </div>` : ''}
+
+            ${job.address ? `<div style="font-size:12px;color:var(--text-muted);">🏠 ${escapeHtml(job.address)}</div>` : ''}
+            <p class="job-desc">${escapeHtml(job.desc)}</p>
+
+            <div class="job-footer">
+              <div class="employer-info">
+                👤 <strong>${escapeHtml(job.ownerName)}</strong> • <span class="rating-star">★ ${displayOwnerRating} (${displayOwnerReviews})</span>
+              </div>
+              ${actionAreaHtml}
+            </div>
+          </article>`;
+      }).join('');
+    }
+
+    function toggleSaveJob(id) {
+      if (savedJobIds.includes(id)) {
+        savedJobIds = savedJobIds.filter(x => x !== id);
+        showToast('Видалено зі збережених', 'info');
+      } else {
+        savedJobIds.push(id);
+        showToast('❤️ Вакансію збережено', 'success');
+      }
+      saveAllState();
+      updateHeaderUI();
+      renderJobs();
+    }
+
+    // ==================== СПРАВЖНЯ КАРТА ЛЬВОВА (LEAFLET + OPENSTREETMAP) ====================
+    const LVIV_BOUNDS = { minLat: 49.760, maxLat: 49.920, minLng: 23.860, maxLng: 24.160 };
+
+    function coordsToPercent(lat, lng) {
+      const x = ((Number(lng) - LVIV_BOUNDS.minLng) / (LVIV_BOUNDS.maxLng - LVIV_BOUNDS.minLng)) * 100;
+      const y = (1 - (Number(lat) - LVIV_BOUNDS.minLat) / (LVIV_BOUNDS.maxLat - LVIV_BOUNDS.minLat)) * 100;
+      return {
+        x: Math.max(6, Math.min(94, x)),
+        y: Math.max(8, Math.min(92, y))
+      };
+    }
+
+    function percentToCoords(xPct, yPct) {
+      const lng = LVIV_BOUNDS.minLng + (xPct / 100) * (LVIV_BOUNDS.maxLng - LVIV_BOUNDS.minLng);
+      const lat = LVIV_BOUNDS.minLat + (1 - yPct / 100) * (LVIV_BOUNDS.maxLat - LVIV_BOUNDS.minLat);
+      return [Number(lat.toFixed(4)), Number(lng.toFixed(4))];
+    }
+
+    function renderFallbackLvivMap(containerId, mode) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+
+      const districtDotsHtml = LVIV_DISTRICTS_GEO.map(d => {
+        const pos = coordsToPercent(d.lat, d.lng);
+        return `
+          <div style="position:absolute;left:${pos.x}%;top:${pos.y}%;transform:translate(-50%,-50%);pointer-events:none;text-align:center;">
+            <div style="width:6px;height:6px;border-radius:50%;background:rgba(148,163,184,0.6);margin:0 auto 2px;"></div>
+            <span style="font-size:9.5px;color:rgba(203,213,225,0.85);background:rgba(11,17,32,0.72);padding:1px 5px;border-radius:5px;white-space:nowrap;">${escapeHtml(d.name.split(' / ')[0])}</span>
+          </div>`;
+      }).join('');
+
+      let markersHtml = '';
+      if (mode === 'main') {
+        const filtered = getFilteredJobs();
+        markersHtml = filtered.map((job, idx) => {
+          const coords = getJobDistrictCoords(job);
+          const pos = coordsToPercent(coords[0] + ((idx % 3) - 1) * 0.002, coords[1] + ((idx % 2) * 0.003));
+          return `
+            <button type="button" onclick="openShareJobModal('${job.id}')" title="${escapeHtml(job.title)}"
+              style="position:absolute;left:${pos.x}%;top:${pos.y}%;transform:translate(-50%,-100%);z-index:5;background:#fbbf24;color:#090d16;font-size:10px;font-weight:900;padding:3px 7px;border-radius:8px;box-shadow:0 3px 10px rgba(0,0,0,0.5);white-space:nowrap;">
+              📍 ${escapeHtml(job.pay)}
+            </button>`;
+        }).join('');
+      } else {
+        const pos = coordsToPercent(pickedCoords[0], pickedCoords[1]);
+        markersHtml = `
+          <div style="position:absolute;left:${pos.x}%;top:${pos.y}%;transform:translate(-50%,-100%);z-index:6;pointer-events:none;text-align:center;">
+            <div style="background:#fbbf24;color:#090d16;font-size:10px;font-weight:900;padding:2px 7px;border-radius:7px;box-shadow:0 3px 10px rgba(0,0,0,0.6);">📍 Точка роботи</div>
+            <div style="font-size:20px;line-height:1;">📌</div>
+          </div>`;
+      }
+
+      el.innerHTML = `
+        <div id="${containerId}_canvas" style="position:relative;width:100%;height:100%;background:radial-gradient(circle at 50% 48%, #162544 0%, #0b1324 100%);overflow:hidden;cursor:${mode === 'picker' ? 'crosshair' : 'default'};">
+          <svg viewBox="0 0 400 260" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;opacity:0.42;pointer-events:none;">
+            <circle cx="200" cy="130" r="36" fill="none" stroke="#38bdf8" stroke-width="1.2" stroke-dasharray="4 4"/>
+            <circle cx="200" cy="130" r="82" fill="none" stroke="#475569" stroke-width="1.2"/>
+            <circle cx="200" cy="130" r="128" fill="none" stroke="#334155" stroke-width="1"/>
+            <path d="M 15 135 Q 120 128 200 130 T 385 125" fill="none" stroke="#fbbf24" stroke-width="1.5" opacity="0.55"/>
+            <path d="M 195 10 Q 202 80 200 130 T 218 250" fill="none" stroke="#fbbf24" stroke-width="1.5" opacity="0.55"/>
+            <path d="M 55 30 L 200 130 L 345 230" fill="none" stroke="#64748b" stroke-width="1.1"/>
+            <path d="M 350 35 L 200 130 L 45 225" fill="none" stroke="#64748b" stroke-width="1.1"/>
+          </svg>
+          ${districtDotsHtml}
+          ${markersHtml}
+          <div style="position:absolute;bottom:6px;right:8px;font-size:10px;color:#94a3b8;background:rgba(11,17,32,0.8);padding:2px 7px;border-radius:6px;pointer-events:none;">
+            🗺 Інтерактивна карта Львова
+          </div>
+        </div>`;
+
+      if (mode === 'picker') {
+        const canvas = document.getElementById(`${containerId}_canvas`);
+        if (canvas) {
+          canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const xPct = ((e.clientX - rect.left) / rect.width) * 100;
+            const yPct = ((e.clientY - rect.top) / rect.height) * 100;
+            pickedCoords = percentToCoords(xPct, yPct);
+            updatePickedCoordsLabel();
+            const nearest = findNearestDistrict(pickedCoords[0], pickedCoords[1]);
+            const distSelect = document.getElementById('jobDistrict');
+            if (distSelect && nearest) distSelect.value = nearest.name;
+            renderFallbackLvivMap(containerId, 'picker');
+          });
+        }
+      }
+    }
+
+    function getJobDistrictCoords(job) {
+      if (Array.isArray(job.coords) && job.coords.length === 2 && !isNaN(Number(job.coords[0])) && !isNaN(Number(job.coords[1]))) {
+        return [Number(job.coords[0]), Number(job.coords[1])];
+      }
+      const found = LVIV_DISTRICTS_GEO.find(d => d.name === job.district);
+      return found ? [found.lat, found.lng] : [49.8397, 24.0297];
+    }
+
+    function refreshMainMapMarkers() {
+      if (typeof L === 'undefined') {
+        renderFallbackLvivMap('mainLvivMap', 'main');
+        return;
+      }
+      if (!mainMap || !mainMarkersLayer) return;
+      mainMarkersLayer.clearLayers();
+
+      const filtered = getFilteredJobs();
+      filtered.forEach((job, idx) => {
+        const coords = getJobDistrictCoords(job);
+        const offsetLat = coords[0] + ((idx % 3) - 1) * 0.0006;
+        const offsetLng = coords[1] + ((Math.floor(idx / 3) % 2) * 0.0008);
+        const isMyOwn = String(job.ownerId) === String(currentUser.id);
+
+        const actionBtnHtml = !currentUser.isRegistered
+          ? `<button onclick="openRegistrationModal('worker', () => openApplyJobModal('${job.id}'))" style="margin-top:6px;width:100%;background:#fbbf24;color:#090d16;font-weight:800;border:none;padding:6px 8px;border-radius:8px;cursor:pointer;">🔒 Реєстрація для відгуку</button>`
+          : isMyOwn
+            ? `<button onclick="switchTab('cabinet')" style="margin-top:6px;width:100%;background:#1e293b;color:#ffffff;font-weight:700;border:1px solid #334155;padding:6px 8px;border-radius:8px;cursor:pointer;">Керувати в кабінеті</button>`
+            : `<button onclick="openApplyJobModal('${job.id}')" style="margin-top:6px;width:100%;background:#10b981;color:#042f1e;font-weight:800;border:none;padding:6px 8px;border-radius:8px;cursor:pointer;">✋ Взятися за роботу</button>`;
+
+        const popupHtml = `
+          <div style="min-width:190px;">
+            <div style="font-size:11px;color:#fbbf24;font-weight:700;">📍 ${escapeHtml(job.district)}</div>
+            <div style="font-size:13px;font-weight:800;color:#ffffff;margin:2px 0;">${escapeHtml(job.title)}</div>
+            <div style="font-size:12px;color:#34d399;font-weight:800;">💰 ${escapeHtml(job.pay)}</div>
+            <div style="font-size:11px;color:#cbd5e1;margin-top:2px;">👥 Є ${job.hiredWorkers || 0} з ${job.neededWorkers || 1}</div>
+            ${actionBtnHtml}
+          </div>`;
+
+        L.marker([offsetLat, offsetLng]).addTo(mainMarkersLayer).bindPopup(popupHtml);
+      });
+    }
+
+    function initMainMap() {
+      setTimeout(() => {
+        const mapEl = document.getElementById('mainLvivMap');
+        if (!mapEl) return;
+        if (typeof L === 'undefined') {
+          renderFallbackLvivMap('mainLvivMap', 'main');
+          return;
+        }
+
+        if (!mainMap) {
+          mainMap = L.map('mainLvivMap').setView([49.8397, 24.0297], 12);
+          L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap, © CARTO'
+          }).addTo(mainMap);
+          mainMarkersLayer = L.layerGroup().addTo(mainMap);
+        }
+
+        mainMap.invalidateSize();
+        setTimeout(() => mainMap && mainMap.invalidateSize(), 300);
+        setTimeout(() => mainMap && mainMap.invalidateSize(), 700);
+        refreshMainMapMarkers();
+      }, 120);
+    }
+
+    function updatePickedCoordsLabel() {
+      const el = document.getElementById('pickedCoordsText');
+      if (el) {
+        el.textContent = `Координати: ${Number(pickedCoords[0]).toFixed(4)}, ${Number(pickedCoords[1]).toFixed(4)}`;
+      }
+    }
+
+    function findNearestDistrict(lat, lng) {
+      let nearest = LVIV_DISTRICTS_GEO[0];
+      let bestDist = Infinity;
+      for (const d of LVIV_DISTRICTS_GEO) {
+        const distSq = (d.lat - lat) ** 2 + (d.lng - lng) ** 2;
+        if (distSq < bestDist) {
+          bestDist = distSq;
+          nearest = d;
+        }
+      }
+      return nearest;
+    }
+
+    function initPickerMap() {
+      setTimeout(() => {
+        const mapEl = document.getElementById('pickerMap');
+        if (!mapEl) return;
+        if (typeof L === 'undefined') {
+          renderFallbackLvivMap('pickerMap', 'picker');
+          updatePickedCoordsLabel();
+          return;
+        }
+
+        if (!pickerMap) {
+          pickerMap = L.map('pickerMap').setView(pickedCoords, 13);
+          L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap, © CARTO'
+          }).addTo(pickerMap);
+
+          pickerMarker = L.marker(pickedCoords, { draggable: true }).addTo(pickerMap);
+
+          pickerMap.on('click', (e) => {
+            pickedCoords = [Number(e.latlng.lat.toFixed(4)), Number(e.latlng.lng.toFixed(4))];
+            pickerMarker.setLatLng(pickedCoords);
+            updatePickedCoordsLabel();
+            const nearest = findNearestDistrict(pickedCoords[0], pickedCoords[1]);
+            const distSelect = document.getElementById('jobDistrict');
+            if (distSelect && nearest) distSelect.value = nearest.name;
+          });
+
+          pickerMarker.on('dragend', () => {
+            const pos = pickerMarker.getLatLng();
+            pickedCoords = [Number(pos.lat.toFixed(4)), Number(pos.lng.toFixed(4))];
+            updatePickedCoordsLabel();
+            const nearest = findNearestDistrict(pickedCoords[0], pickedCoords[1]);
+            const distSelect = document.getElementById('jobDistrict');
+            if (distSelect && nearest) distSelect.value = nearest.name;
+          });
+        } else {
+          pickerMap.setView(pickedCoords, 13);
+          if (pickerMarker) pickerMarker.setLatLng(pickedCoords);
+        }
+
+        pickerMap.invalidateSize();
+        setTimeout(() => pickerMap && pickerMap.invalidateSize(), 300);
+        setTimeout(() => pickerMap && pickerMap.invalidateSize(), 700);
+        updatePickedCoordsLabel();
+      }, 120);
+    }
+
+    // ==================== ПОШИРЕННЯ ВАКАНСІЇ В TELEGRAM-ГРУПИ ====================
+    function openShareJobModal(jobId) {
+      const job = jobs.find(j => j.id === jobId);
+      if (!job) return;
+      const needed = Math.max(1, Number(job.neededWorkers || 1));
+      const hired = Math.max(0, Number(job.hiredWorkers || 0));
+      const left = Math.max(0, needed - hired);
+      const isUrgent = Boolean(job.isUrgent) || (job.tags || []).includes('urgent');
+
+      const lines = [
+        `${isUrgent ? '🔥 ТЕРМІНОВИЙ ПІДРОБІТОК У ЛЬВОВІ!' : '🦁 ПІДРОБІТОК.ЛЬВІВ — НОВА ВАКАНСІЯ'}`,
+        ``,
+        `💼 ${job.title}`,
+        `📍 Район: ${job.district}${job.address ? ' (' + job.address + ')' : ''}`,
+        `💰 Оплата: ${job.pay}`,
+        job.schedule ? `🕒 Графік: ${job.schedule}` : null,
+        `👥 Потрібно людей: ${needed} (вільно місць: ${left})`,
+        ``,
+        `👉 Відгукнутися та подивитися точку на карті Львова:`,
+        `${BOT_SHARE_URL}`
+      ].filter(line => line !== null);
+
+      activeShareText = lines.join('\n');
+      document.getElementById('shareJobPreviewText').textContent = activeShareText;
+      document.getElementById('shareJobTgDirectLink').href =
+        `https://t.me/share/url?url=${encodeURIComponent(BOT_SHARE_URL)}&text=${encodeURIComponent(activeShareText)}`;
+      document.getElementById('shareJobModal').classList.remove('hidden');
+      resetModalScroll('shareJobModal');
+    }
+
+    function closeShareJobModal() {
+      document.getElementById('shareJobModal').classList.add('hidden');
+    }
+
+    function copyShareJobText() {
+      if (!activeShareText) return;
+      const ta = document.createElement('textarea');
+      ta.value = activeShareText;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('✅ Текст оголошення скопійовано для вставки в групу!', 'success');
+      } catch (e) {
+        showToast('⚠️ Скопіюйте текст із вікна вручну', 'info');
+      }
+      document.body.removeChild(ta);
+    }
+
+    // ==================== СТВОРЕННЯ ВАКАНСІЇ, ЛІЧИЛЬНИК ЛЮДЕЙ ТА MONOBANK ====================
+    function handleOpenJobCreate() {
+      if (!currentUser.isRegistered) {
+        openRegistrationModal('employer', () => openJobModal());
+        return;
+      }
+      if (currentUser.role !== 'employer') {
+        currentUser.role = 'employer';
+        saveAllState();
+        fbPutEntity('users', currentUser.id, currentUser);
+        updateHeaderUI();
+      }
+      openJobModal();
+    }
+
+    function adjustNeededInput(delta) {
+      jobFormNeededCount = Math.max(1, Math.min(50, jobFormNeededCount + delta));
+      updateNeededInputUI();
+    }
+
+    function setNeededPreset(val) {
+      jobFormNeededCount = val;
+      updateNeededInputUI();
+    }
+
+    function updateNeededInputUI() {
+      document.getElementById('jobNeededDisplay').textContent = jobFormNeededCount;
+      document.querySelectorAll('.preset-pill').forEach(btn => {
+        btn.classList.toggle('active', Number(btn.dataset.preset) === jobFormNeededCount);
+      });
+    }
+
+    function syncPickerDistrict(distName) {
+      const found = LVIV_DISTRICTS_GEO.find(d => d.name === distName);
+      if (found) {
+        pickedCoords = [found.lat, found.lng];
+        updatePickedCoordsLabel();
+        if (typeof L === 'undefined') {
+          renderFallbackLvivMap('pickerMap', 'picker');
+        } else if (pickerMap && pickerMarker) {
+          pickerMap.setView(pickedCoords, 13);
+          pickerMarker.setLatLng(pickedCoords);
+        }
+      }
+    }
+
+    function togglePromoOption(opt) {
+      if (opt === 'top') {
+        const chk = document.getElementById('chkOptTop');
+        chk.checked = !chk.checked;
+      } else if (opt === 'urgent') {
+        const chk = document.getElementById('chkOptUrgent');
+        chk.checked = !chk.checked;
+      }
+      updateJobCostSummary();
+    }
+
+    function calculateNewJobTotal() {
+      const myCount = jobs.filter(j => String(j.ownerId) === String(currentUser.id)).length;
+      const hasFreePub = myCount < Number(config.freeLimit);
+      const promo = (document.getElementById('jobPromoInput')?.value || '').trim().toUpperCase();
+      const hasValidPromo = promo && (config.promos || []).map(p => p.trim().toUpperCase()).includes(promo);
+
+      const wantTop = Boolean(document.getElementById('chkOptTop')?.checked);
+      const wantUrgent = Boolean(document.getElementById('chkOptUrgent')?.checked);
+
+      const pubCost = (hasFreePub || hasValidPromo) ? 0 : Number(config.price || 5);
+      const topCost = wantTop ? Number(config.topPrice || 15) : 0;
+      const urgentCost = wantUrgent ? Number(config.urgentPrice || 10) : 0;
+      const total = pubCost + topCost + urgentCost;
+
+      return { pubCost, topCost, urgentCost, total, wantTop, wantUrgent, hasFreePub, hasValidPromo };
+    }
+
+    function updateJobCostSummary() {
+      const { pubCost, topCost, urgentCost, total, wantTop, wantUrgent, hasValidPromo } = calculateNewJobTotal();
+      document.getElementById('cardOptTop').classList.toggle('checked', wantTop);
+      document.getElementById('cardOptUrgent').classList.toggle('checked', wantUrgent);
+
+      const lines = [];
+      lines.push(`• Розміщення вакансії: <b>${pubCost === 0 ? (hasValidPromo ? '0 грн (промокод)' : '0 грн (безкоштовний ліміт)') : pubCost + ' грн'}</b>`);
+      if (wantTop) lines.push(`• ⭐ Вивести в ТОП: <b>+${topCost} грн</b>`);
+      if (wantUrgent) lines.push(`• 🔥 Термінове: <b>+${urgentCost} грн</b>`);
+      lines.push(`<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;">
+        <span>Разом до сплати:</span>
+        <strong style="color:${total === 0 ? 'var(--emerald)' : 'var(--amber)'};">${total === 0 ? 'Безкоштовно (0 грн)' : total + ' грн'}</strong>
+      </div>`);
+
+      document.getElementById('jobCostSummary').innerHTML = lines.join('<br/>');
+    }
+
+    function openJobModal() {
+      jobFormNeededCount = 1;
+      updateNeededInputUI();
+      document.getElementById('jobTitle').value = '';
+      document.getElementById('jobPay').value = '';
+      document.getElementById('jobSchedule').value = '';
+      document.getElementById('jobAddress').value = '';
+      document.getElementById('jobDesc').value = '';
+      document.getElementById('jobPromoInput').value = '';
+      document.getElementById('chkOptTop').checked = false;
+      document.getElementById('chkOptUrgent').checked = false;
+
+      document.getElementById('optTopPriceLabel').textContent = `${config.topPrice || 15} грн`;
+      document.getElementById('optUrgentPriceLabel').textContent = `${config.urgentPrice || 10} грн`;
+
+      const myCount = jobs.filter(j => String(j.ownerId) === String(currentUser.id)).length;
+      const leftFree = Math.max(0, Number(config.freeLimit) - myCount);
+      const banner = document.getElementById('jobLimitBanner');
+
+      if (leftFree > 0) {
+        banner.innerHTML = `🎁 У вас є <b>${leftFree}</b> безкоштовна публікація! Додаткові опції (ТОП / Термінове) оплачуються за бажанням.`;
+      } else {
+        banner.innerHTML = `💡 Безкоштовний ліміт використано. Вартість публікації становить <b>${config.price} грн</b> через Monobank.`;
+      }
+
+      updateJobCostSummary();
+      document.getElementById('jobModal').classList.remove('hidden');
+      resetModalScroll('jobModal');
+
+      const initialDist = document.getElementById('jobDistrict').value;
+      const foundDist = LVIV_DISTRICTS_GEO.find(d => d.name === initialDist) || LVIV_DISTRICTS_GEO[0];
+      pickedCoords = [foundDist.lat, foundDist.lng];
+      initPickerMap();
+    }
+
+    function closeJobModal() {
+      document.getElementById('jobModal').classList.add('hidden');
+    }
+
+    function useMyGeo() {
+      if (!navigator.geolocation) {
+        showToast('📍 Геолокація не підтримується — натисніть потрібне місце на карті Львова', 'info');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition((pos) => {
+        pickedCoords = [Number(pos.coords.latitude.toFixed(4)), Number(pos.coords.longitude.toFixed(4))];
+        updatePickedCoordsLabel();
+        if (typeof L === 'undefined') {
+          renderFallbackLvivMap('pickerMap', 'picker');
+        } else if (pickerMap && pickerMarker) {
+          pickerMap.setView(pickedCoords, 15);
+          pickerMarker.setLatLng(pickedCoords);
+        }
+        const nearest = findNearestDistrict(pickedCoords[0], pickedCoords[1]);
+        const distSelect = document.getElementById('jobDistrict');
+        if (distSelect && nearest) distSelect.value = nearest.name;
+        showToast('📍 Вашу геопозицію встановлено на карті!', 'success');
+      }, () => {
+        showToast('📍 Не вдалося визначити GPS — поставте мітку кліком по карті', 'info');
+      });
+    }
+
+    function submitJob() {
+      const title = document.getElementById('jobTitle').value.trim();
+      const category = document.getElementById('jobCategory').value;
+      const pay = document.getElementById('jobPay').value.trim();
+      const schedule = document.getElementById('jobSchedule').value.trim();
+      const district = document.getElementById('jobDistrict').value;
+      const address = document.getElementById('jobAddress').value.trim();
+      const desc = document.getElementById('jobDesc').value.trim();
+
+      if (!title || !pay || !desc) {
+        showToast('⚠️ Заповніть назву вакансії, оплату та опис!', 'error');
+        return;
+      }
+
+      const tags = [];
+      if (document.getElementById('tagDaily').checked) tags.push('daily');
+      if (document.getElementById('tagWeekend').checked) tags.push('weekend');
+      if (document.getElementById('tagOnetime').checked) tags.push('onetime');
+
+      const { total, wantTop, wantUrgent } = calculateNewJobTotal();
+      if (wantUrgent) tags.push('urgent');
+
+      const newJob = {
+        id: 'job_' + Date.now(),
+        ownerId: currentUser.id,
+        ownerName: currentUser.name,
+        ownerRating: currentUser.rating,
+        contactUsername: currentUser.username,
+        contactPhone: currentUser.phone,
+        title, category, pay, schedule, district, address, desc, tags,
+        neededWorkers: jobFormNeededCount,
+        hiredWorkers: 0,
+        filledAt: null,
+        coords: pickedCoords,
+        isTop: false,
+        isUrgent: false,
+        requestedTop: wantTop,
+        requestedUrgent: wantUrgent,
+        status: total === 0 ? 'active' : 'pending_payment',
+        createdAt: Date.now()
+      };
+
+      jobs.unshift(newJob);
+      saveAllState();
+      fbPutEntity('jobs', newJob.id, newJob);
+      closeJobModal();
+      updateHeaderUI();
+
+      if (total === 0) {
+        renderJobs();
+        if (currentJobsView === 'map') refreshMainMapMarkers();
+        renderCabinet();
+        showToast('✅ Вакансію успішно опубліковано!', 'success');
+      } else {
+        const services = [];
+        if (total - (wantTop ? Number(config.topPrice || 15) : 0) - (wantUrgent ? Number(config.urgentPrice || 10) : 0) > 0) services.push('Публікація');
+        if (wantTop) services.push('⭐ ТОП');
+        if (wantUrgent) services.push('🔥 Термінове');
+
+        openMonoModal({
+          jobId: newJob.id,
+          jobTitle: newJob.title,
+          amount: total,
+          serviceLabel: services.join(' + '),
+          grantPublish: newJob.status === 'pending_payment',
+          grantTop: wantTop,
+          grantUrgent: wantUrgent
+        });
+      }
+    }
+
+    function openPromoteExistingJob(jobId, mode) {
+      const job = jobs.find(j => j.id === jobId);
+      if (!job) return;
+      const isTopMode = mode === 'top';
+      const amount = isTopMode ? Number(config.topPrice || 15) : Number(config.urgentPrice || 10);
+      openMonoModal({
+        jobId: job.id,
+        jobTitle: job.title,
+        amount,
+        serviceLabel: isTopMode ? '⭐ Вивести в ТОП' : '🔥 Термінове замовлення',
+        grantPublish: job.status === 'pending_payment',
+        grantTop: isTopMode,
+        grantUrgent: !isTopMode
+      });
+    }
+
+    function openMonoModalForExistingJob(jobId) {
+      const job = jobs.find(j => j.id === jobId);
+      if (!job) return;
+      const amount = Number(config.price || 5)
+        + (job.requestedTop ? Number(config.topPrice || 15) : 0)
+        + (job.requestedUrgent ? Number(config.urgentPrice || 10) : 0);
+
+      openMonoModal({
+        jobId: job.id,
+        jobTitle: job.title,
+        amount,
+        serviceLabel: 'Оплата публікації та опцій',
+        grantPublish: true,
+        grantTop: Boolean(job.requestedTop),
+        grantUrgent: Boolean(job.requestedUrgent)
+      });
+    }
+
+    function openMonoModal(orderCfg) {
+      const code = 'LV-' + Math.floor(1000 + Math.random() * 9000);
+      pendingOrder = {
+        id: 'pay_' + Date.now(),
+        code,
+        jobId: orderCfg.jobId,
+        jobTitle: orderCfg.jobTitle,
+        serviceLabel: orderCfg.serviceLabel || 'Публікація',
+        grantPublish: Boolean(orderCfg.grantPublish),
+        grantTop: Boolean(orderCfg.grantTop),
+        grantUrgent: Boolean(orderCfg.grantUrgent),
+        userName: currentUser.name,
+        userId: currentUser.id,
+        amount: Number(orderCfg.amount),
+        status: 'pending',
+        createdAt: Date.now()
+      };
+      document.getElementById('monoOrderCode').textContent = '#' + code;
+      document.getElementById('monoServiceLabel').textContent = pendingOrder.serviceLabel;
+      document.getElementById('monoOrderAmount').textContent = `${pendingOrder.amount} грн`;
+      document.getElementById('monoCardDisplay').textContent = config.monoCard;
+      document.getElementById('receiptFileInput').value = '';
+      document.getElementById('monoModal').classList.remove('hidden');
+      resetModalScroll('monoModal');
+    }
+
+    function closeMonoModal() {
+      document.getElementById('monoModal').classList.add('hidden');
+    }
+
+    function copyMonoCard() {
+      const ta = document.createElement('textarea');
+      ta.value = config.monoCard;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('✅ Реквізити Monobank скопійовано!', 'success');
+      } catch (e) {
+        showToast('⚠️ Скопіюйте номер картки вручну', 'info');
+      }
+      document.body.removeChild(ta);
+    }
+
+    async function submitPaymentReceipt() {
+      const fileInput = document.getElementById('receiptFileInput');
+      const file = fileInput.files[0];
+      if (!file) {
+        showToast('⚠️ Прикріпіть скріншот або PDF-квитанцію Monobank!', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('btnSendReceipt');
+      btn.disabled = true;
+      btn.textContent = '⏳ Збереження квитанції...';
+
+      pendingOrder.receiptFileName = file.name;
+      payments.unshift(pendingOrder);
+      saveAllState();
+      fbPutEntity('payments', pendingOrder.id, pendingOrder);
+
+      if (config.botToken && config.adminChatId) {
+        const formData = new FormData();
+        formData.append('chat_id', config.adminChatId);
+        formData.append('document', file);
+        formData.append('caption',
+          `💳 Нова оплата Monobank!\n` +
+          `Замовлення: #${pendingOrder.code}\n` +
+          `Послуга: ${pendingOrder.serviceLabel}\n` +
+          `Сума: ${pendingOrder.amount} грн\n` +
+          `Вакансія: ${pendingOrder.jobTitle}\n` +
+          `Від: ${pendingOrder.userName} (ID: ${pendingOrder.userId})`
+        );
+        await safeFetchWithTimeout(`https://api.telegram.org/bot${config.botToken}/sendDocument`, {
+          method: 'POST',
+          body: formData
+        }, 8000);
+      }
+
+      btn.disabled = false;
+      btn.textContent = '✅ Надіслати чек на перевірку';
+      closeMonoModal();
+      renderCabinet();
+      showToast(`✅ Квитанцію #${pendingOrder.code} надіслано на перевірку!`, 'success');
+    }
+
+    // ==================== ВІДГУКИ ВИКОНАВЦІВ НА РОБОТУ ====================
+    function openApplyJobModal(jobId) {
+      if (!currentUser.isRegistered) {
+        openRegistrationModal('worker', () => openApplyJobModal(jobId));
+        return;
+      }
+      const job = jobs.find(j => j.id === jobId);
+      if (!job) return;
+      activeApplyJobId = jobId;
+      document.getElementById('applyJobSummary').innerHTML = `
+        <div style="font-weight:800;color:#ffffff;">${escapeHtml(job.title)}</div>
+        <div style="color:#34d399;margin-top:3px;">💰 ${escapeHtml(job.pay)} • 📍 ${escapeHtml(job.district)}</div>
+      `;
+      document.getElementById('applyMessageInput').value = '';
+      document.getElementById('applyJobModal').classList.remove('hidden');
+      resetModalScroll('applyJobModal');
+    }
+
+    function closeApplyJobModal() {
+      document.getElementById('applyJobModal').classList.add('hidden');
+      activeApplyJobId = null;
+    }
+
+    async function confirmApplyToJob() {
+      const job = jobs.find(j => j.id === activeApplyJobId);
+      if (!job) return;
+      const message = document.getElementById('applyMessageInput').value.trim();
+
+      const existing = applications.find(a => a.jobId === job.id && String(a.workerId) === String(currentUser.id));
+      if (!existing) {
+        const newApp = {
+          id: 'app_' + Date.now(),
+          jobId: job.id,
+          jobTitle: job.title,
+          jobPay: job.pay,
+          jobDistrict: job.district,
+          employerId: job.ownerId,
+          employerName: job.ownerName,
+          employerPhone: job.contactPhone || '',
+          employerUsername: job.contactUsername || '',
+          workerId: currentUser.id,
+          workerName: currentUser.name,
+          workerPhone: currentUser.phone,
+          workerUsername: currentUser.username,
+          workerSpec: currentUser.spec || 'Виконавець',
+          workerDistrict: currentUser.district,
+          workerRating: currentUser.rating || 5.0,
+          message,
+          status: 'applied',
+          ratedWorker: false,
+          ratedEmployer: false,
+          createdAt: Date.now()
+        };
+        applications.unshift(newApp);
+        saveAllState();
+        fbPutEntity('applications', newApp.id, newApp);
+
+        const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+        if (isOnline && config.botToken && /^\d+$/.test(String(job.ownerId))) {
+          const notifyLines = [
+            `🙋 Новий відгук на вашу вакансію у «Підробіток.Львів»!`,
+            ``,
+            `💼 Вакансія: ${job.title}`,
+            `👷 Кандидат: ${currentUser.name} (★ ${Number(currentUser.rating || 5).toFixed(1)})`,
+            `🛠 Спеціалізація: ${currentUser.spec || 'Виконавець'}`,
+            `📍 Район: ${currentUser.district}`,
+            `📞 Телефон: ${currentUser.phone}`,
+            currentUser.username ? `💬 Telegram: ${currentUser.username}` : null,
+            message ? `📝 Повідомлення: «${message}»` : null,
+            ``,
+            `👉 Відкрийте додаток та перейдіть у «Кабінет», щоб прийняти виконавця в команду.`
+          ].filter(Boolean).join('\n');
+
+          await safeFetchWithTimeout(`https://api.telegram.org/bot${config.botToken}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: String(job.ownerId),
+              text: notifyLines
+            })
+          });
+        }
+      }
+
+      closeApplyJobModal();
+      renderJobs();
+      renderCabinet();
+      showToast('✅ Відгук надіслано роботодавцю! Контакти відкрито.', 'success');
+    }
+
+    // ==================== ВИКОНАВЦІ ТА КАБІНЕТ РОБОТОДАВЦЯ / ВИКОНАВЦЯ ====================
+    function renderWorkers() {
+      const q = document.getElementById('workerSearchInput').value.toLowerCase().trim();
+      const dist = document.getElementById('workerDistrictFilter').value;
+      const onlyFree = document.getElementById('onlyFreeWorkers').checked;
+      const container = document.getElementById('workersListContainer');
+
+      let workersList = usersDb.filter(u => u.isRegistered && u.role === 'worker');
+      if (q) {
+        workersList = workersList.filter(w =>
+          (w.name || '').toLowerCase().includes(q) ||
+          (w.spec || '').toLowerCase().includes(q)
+        );
+      }
+      if (dist) workersList = workersList.filter(w => w.district === dist);
+      if (onlyFree) workersList = workersList.filter(w => w.isFree !== false);
+
+      if (!workersList.length) {
+        container.innerHTML = `
+          <div class="card" style="text-align:center;padding:24px 14px;">
+            <div style="font-size:28px;margin-bottom:6px;">👷</div>
+            <p style="margin:0;font-size:12.5px;color:var(--text-muted);">
+              Зареєстрованих виконавців за цими фільтрами поки немає. Зареєструйтеся у Кабінеті як «Виконавець», щоб з'явитися тут.
+            </p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = workersList.map(w => {
+        const tgLink = w.username ? `https://t.me/${escapeHtml(w.username.replace('@', ''))}` : null;
+        return `
+          <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+            <div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <strong style="font-size:14px;">${escapeHtml(w.name)}</strong>
+                <span class="rating-star" style="font-size:12px;">★ ${Number(w.rating || 5).toFixed(1)} (${w.reviewsCount || 0})</span>
+              </div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">
+                🛠 ${escapeHtml(w.spec || 'Виконавець')} • 📍 ${escapeHtml(w.district)}
+              </div>
+            </div>
+            ${!currentUser.isRegistered
+              ? `<button onclick="openRegistrationModal('employer')" class="btn btn-primary btn-xs">🔒 Реєстрація</button>`
+              : `<div style="display:flex;gap:6px;">
+                  ${w.phone ? `<a href="tel:${escapeHtml(w.phone)}" class="btn btn-secondary btn-xs">📞</a>` : ''}
+                  ${tgLink ? `<a href="${tgLink}" target="_blank" class="btn btn-emerald btn-xs">💬 Написати</a>` : ''}
+                </div>`
+            }
+          </div>`;
+      }).join('');
+    }
+
+    function renderMyJobs() {
+      const my = jobs.filter(j => String(j.ownerId) === String(currentUser.id));
+      const container = document.getElementById('myJobsList');
+      if (!my.length) {
+        container.innerHTML = `<p style="margin:0;font-size:12px;color:var(--text-muted);">У вас ще немає створених пропозицій.</p>`;
+        return;
+      }
+
+      container.innerHTML = my.map(j => {
+        const needed = Math.max(1, Number(j.neededWorkers || 1));
+        const hired = Math.max(0, Number(j.hiredWorkers || 0));
+        const isFull = hired >= needed;
+
+        return `
+          <div style="background:#0c1324;border:1px solid var(--border);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+              <div>
+                <div style="font-size:13.5px;font-weight:800;color:#ffffff;">${escapeHtml(j.title)}</div>
+                <div style="font-size:11.5px;margin-top:2px;color:${j.status === 'active' ? '#34d399' : 'var(--amber)'};">
+                  ${j.status === 'active' ? '● Активна у стрічці' : '⏳ Очікує оплати / підтвердження'}
+                  ${j.isTop ? ' • ⭐ ТОП' : ''}${j.isUrgent ? ' • 🔥 Термінове' : ''}
+                </div>
+              </div>
+              <button onclick="askDeleteJob('${j.id}')" class="btn btn-danger btn-xs" title="Видалити зараз">🗑️ Видалити</button>
+            </div>
+
+            <!-- Керування кількістю людей -->
+            <div class="grid-2" style="background:var(--bg-input);padding:8px;border-radius:10px;font-size:11.5px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span>Є людей:</span>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <button onclick="changeJobHiredCount('${j.id}', -1)" class="btn-step" style="width:26px;height:26px;font-size:14px;">−</button>
+                  <strong style="color:var(--emerald);">${hired}</strong>
+                  <button onclick="changeJobHiredCount('${j.id}', 1)" class="btn-step" style="width:26px;height:26px;font-size:14px;">+</button>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span>Треба всього:</span>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <button onclick="changeJobNeededCount('${j.id}', -1)" class="btn-step" style="width:26px;height:26px;font-size:14px;">−</button>
+                  <strong style="color:var(--amber);">${needed}</strong>
+                  <button onclick="changeJobNeededCount('${j.id}', 1)" class="btn-step" style="width:26px;height:26px;font-size:14px;">+</button>
+                </div>
+              </div>
+            </div>
+
+            ${isFull ? `
+              <div class="countdown-banner">
+                <span>⏳ Набір завершено! Видалення через:</span>
+                <span class="job-countdown-timer" data-filled-at="${j.filledAt || Date.now()}" style="font-family:monospace;font-weight:900;">
+                  ${formatRemainingCountdown(j.filledAt)}
+                </span>
+              </div>` : ''}
+
+            <!-- Кнопки просування та оплати -->
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              ${j.status !== 'active' ? `<button onclick="openMonoModalForExistingJob('${j.id}')" class="btn btn-primary btn-xs">💳 Оплатити / Чек Monobank</button>` : ''}
+              ${!j.isTop ? `<button onclick="openPromoteExistingJob('${j.id}', 'top')" class="btn btn-secondary btn-xs">⭐ В ТОП (${config.topPrice || 15} грн)</button>` : ''}
+              ${!j.isUrgent ? `<button onclick="openPromoteExistingJob('${j.id}', 'urgent')" class="btn btn-secondary btn-xs">🔥 Термінове (${config.urgentPrice || 10} грн)</button>` : ''}
+              <button onclick="openShareJobModal('${j.id}')" class="btn btn-sky btn-xs">📤 Поділитися</button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function changeJobHiredCount(jobId, delta) {
+      const job = jobs.find(j => j.id === jobId);
+      if (!job) return;
+      const needed = Math.max(1, Number(job.neededWorkers || 1));
+      const nextHired = Math.max(0, Math.min(needed, Number(job.hiredWorkers || 0) + delta));
+      job.hiredWorkers = nextHired;
+
+      if (nextHired >= needed) {
+        if (!job.filledAt) job.filledAt = Date.now();
+        showToast('✅ Усі люди набрані! Оголошення автовидалиться через 15 хв.', 'info');
+      } else {
+        job.filledAt = null;
+      }
+
+      saveAllState();
+      fbPutEntity('jobs', job.id, job);
+      renderJobs();
+      renderMyJobs();
+    }
+
+    function changeJobNeededCount(jobId, delta) {
+      const job = jobs.find(j => j.id === jobId);
+      if (!job) return;
+      const nextNeeded = Math.max(1, Math.min(50, Number(job.neededWorkers || 1) + delta));
+      job.neededWorkers = nextNeeded;
+      if ((job.hiredWorkers || 0) >= nextNeeded) {
+        if (!job.filledAt) job.filledAt = Date.now();
+      } else {
+        job.filledAt = null;
+      }
+      saveAllState();
+      fbPutEntity('jobs', job.id, job);
+      renderJobs();
+      renderMyJobs();
+    }
+
+    function askDeleteJob(jobId) {
+      openConfirmDialog(
+        'Видалити вакансію?',
+        'Оголошення буде одразу знято зі стрічки та карти Львова.',
+        '🗑️ Так, видалити',
+        () => deleteJob(jobId)
+      );
+    }
+
+    function deleteJob(id) {
+      jobs = jobs.filter(j => j.id !== id);
+      saveAllState();
+      fbDeleteEntity('jobs', id);
+      renderJobs();
+      renderCabinet();
+      if (!document.getElementById('tab-admin').classList.contains('hidden')) {
+        renderAdminData();
+      }
+      showToast('🗑️ Вакансію видалено', 'info');
+    }
+
+    function renderEmployerApplications() {
+      const empApps = applications.filter(a => String(a.employerId) === String(currentUser.id));
+      const container = document.getElementById('employerApplicationsList');
+      if (!empApps.length) {
+        container.innerHTML = `<p style="margin:0;font-size:12px;color:var(--text-muted);">Поки що немає відгуків на ваші вакансії.</p>`;
+        return;
+      }
+      container.innerHTML = empApps.map(app => {
+        const tgLink = app.workerUsername ? `https://t.me/${escapeHtml(app.workerUsername.replace('@', ''))}` : null;
+        const workerUser = usersDb.find(u => String(u.id) === String(app.workerId));
+        const wRating = Number(workerUser?.rating ?? app.workerRating ?? 5).toFixed(1);
+
+        return `
+          <div style="background:#0c1324;border:1px solid var(--border);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;font-size:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;">
+              <strong>👷 ${escapeHtml(app.workerName)} <span class="rating-star">★ ${wRating}</span></strong>
+              <span class="pill-badge ${app.status === 'accepted' ? 'pill-emerald' : 'pill-amber'}">${app.status === 'accepted' ? '✅ Прийнято в команду' : '⏳ Новий відгук'}</span>
+            </div>
+            <div style="color:var(--text-muted);">На вакансію: <strong style="color:var(--text-primary);">${escapeHtml(app.jobTitle)}</strong></div>
+            ${app.message ? `<div style="background:var(--bg-input);padding:6px 9px;border-radius:8px;color:var(--text-secondary);">«${escapeHtml(app.message)}»</div>` : ''}
+            <div style="display:flex;flex-wrap:wrap;gap:6px;padding-top:4px;align-items:center;">
+              ${app.workerPhone ? `<a href="tel:${escapeHtml(app.workerPhone)}" class="btn btn-secondary btn-xs">📞 ${escapeHtml(app.workerPhone)}</a>` : ''}
+              ${tgLink ? `<a href="${tgLink}" target="_blank" class="btn btn-sky btn-xs">💬 Telegram</a>` : ''}
+              ${app.status !== 'accepted'
+                ? `<button onclick="acceptWorkerApplication('${app.id}')" class="btn btn-emerald btn-xs">✅ Прийняти (+1)</button>`
+                : (!app.ratedWorker
+                    ? `<button onclick="openRatingModal('${app.id}', 'worker')" class="btn btn-primary btn-xs">⭐ Оцінити виконавця</button>`
+                    : `<span class="pill-badge pill-amber">★ Оцінено (${app.workerGivenRating}/5)</span>`)
+              }
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    async function acceptWorkerApplication(appId) {
+      const app = applications.find(a => a.id === appId);
+      if (!app || app.status === 'accepted') return;
+      app.status = 'accepted';
+      saveAllState();
+      fbPutEntity('applications', app.id, app);
+      changeJobHiredCount(app.jobId, 1);
+      showToast(`✅ Виконавця ${app.workerName} прийнято (+1)!`, 'success');
+
+      const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+      if (isOnline && config.botToken && /^\d+$/.test(String(app.workerId))) {
+        await safeFetchWithTimeout(`https://api.telegram.org/bot${config.botToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: String(app.workerId),
+            text: `🎉 Вас прийнято в команду!\n\n💼 Вакансія: ${app.jobTitle}\n💰 Оплата: ${app.jobPay}\n👤 Роботодавець: ${app.employerName} (${app.employerPhone || ''})\n\nДеталі доступні у вкладці «Кабінет».`
+          })
+        });
+      }
+    }
+
+    function renderMyApplications() {
+      const myApps = applications.filter(a => String(a.workerId) === String(currentUser.id));
+      const container = document.getElementById('myApplicationsList');
+      if (!myApps.length) {
+        container.innerHTML = `<p style="margin:0;font-size:12px;color:var(--text-muted);">Ви ще не бралися за жодну вакансію. Натисніть «✋ Взятися за роботу» на будь-якій пропозиції.</p>`;
+        return;
+      }
+      container.innerHTML = myApps.map(app => {
+        const empTgLink = app.employerUsername ? `https://t.me/${escapeHtml(app.employerUsername.replace('@', ''))}` : null;
+        return `
+          <div style="background:#0c1324;border:1px solid var(--border);border-radius:12px;padding:10px;font-size:12px;display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+              <div>
+                <div style="font-weight:800;color:#ffffff;">${escapeHtml(app.jobTitle)}</div>
+                <div style="color:#34d399;margin-top:2px;">💰 ${escapeHtml(app.jobPay)} • 📍 ${escapeHtml(app.jobDistrict || 'Львів')}</div>
+                <div style="color:var(--text-muted);font-size:11.5px;margin-top:2px;">👤 Роботодавець: <strong style="color:var(--text-primary);">${escapeHtml(app.employerName)}</strong></div>
+              </div>
+              <span class="pill-badge ${app.status === 'accepted' ? 'pill-emerald' : 'pill-sky'}">
+                ${app.status === 'accepted' ? '✅ Вас прийнято в команду!' : '⏳ Очікує рішення'}
+              </span>
+            </div>
+
+            <div style="display:flex;flex-wrap:wrap;gap:6px;padding-top:4px;border-top:1px solid var(--border);">
+              ${app.employerPhone ? `<a href="tel:${escapeHtml(app.employerPhone)}" class="btn btn-secondary btn-xs">📞 ${escapeHtml(app.employerPhone)}</a>` : ''}
+              ${empTgLink ? `<a href="${empTgLink}" target="_blank" class="btn btn-sky btn-xs">💬 Зв'язатися в Telegram</a>` : ''}
+              ${app.status === 'accepted'
+                ? (!app.ratedEmployer
+                    ? `<button onclick="openRatingModal('${app.id}', 'employer')" class="btn btn-primary btn-xs">⭐ Оцінити роботодавця</button>`
+                    : `<span class="pill-badge pill-amber">★ Ви оцінили (${app.employerGivenRating}/5)</span>`)
+                : ''
+              }
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // ==================== ВЗАЄМНИЙ РЕЙТИНГ ТА ВІДГУКИ ====================
+    function openRatingModal(appId, targetRole) {
+      const app = applications.find(a => a.id === appId);
+      if (!app) return;
+
+      const isRatingWorker = targetRole === 'worker';
+      const targetUserId = isRatingWorker ? app.workerId : app.employerId;
+      const targetName = isRatingWorker ? app.workerName : app.employerName;
+
+      activeRatingContext = {
+        appId: app.id,
+        jobId: app.jobId,
+        jobTitle: app.jobTitle,
+        targetRole,
+        targetUserId,
+        targetName
+      };
+
+      document.getElementById('ratingModalTitle').textContent =
+        isRatingWorker ? '⭐ Оцінити виконавця' : '⭐ Оцінити роботодавця';
+      document.getElementById('ratingTargetInfo').innerHTML = `
+        <div style="font-weight:800;color:#ffffff;">${isRatingWorker ? '👷' : '💼'} ${escapeHtml(targetName)}</div>
+        <div style="color:var(--text-muted);font-size:11.5px;margin-top:2px;">Вакансія: ${escapeHtml(app.jobTitle)}</div>
+      `;
+      document.getElementById('ratingCommentInput').value = '';
+      setRatingStars(5);
+      document.getElementById('ratingModal').classList.remove('hidden');
+      resetModalScroll('ratingModal');
+    }
+
+    function closeRatingModal() {
+      document.getElementById('ratingModal').classList.add('hidden');
+      activeRatingContext = null;
+    }
+
+    function setRatingStars(score) {
+      selectedStarScore = score;
+      document.querySelectorAll('#ratingModal .star-btn').forEach(btn => {
+        const starVal = Number(btn.dataset.star);
+        btn.classList.toggle('active', starVal <= score);
+      });
+    }
+
+    function submitMutualRating() {
+      if (!activeRatingContext) return;
+      const { appId, jobTitle, targetRole, targetUserId, targetName } = activeRatingContext;
+      const comment = document.getElementById('ratingCommentInput').value.trim();
+
+      const reviewObj = {
+        id: 'rev_' + Date.now(),
+        appId,
+        jobTitle,
+        fromUserId: currentUser.id,
+        fromUserName: currentUser.name,
+        targetUserId: String(targetUserId),
+        targetName,
+        targetRole,
+        score: selectedStarScore,
+        comment,
+        createdAt: Date.now()
+      };
+
+      reviewsDb.unshift(reviewObj);
+
+      const targetReviews = reviewsDb.filter(r => String(r.targetUserId) === String(targetUserId));
+      const count = targetReviews.length;
+      const avg = count > 0
+        ? Number((targetReviews.reduce((sum, r) => sum + Number(r.score || 5), 0) / count).toFixed(1))
+        : 5.0;
+
+      const userIdx = usersDb.findIndex(u => String(u.id) === String(targetUserId));
+      if (userIdx >= 0) {
+        usersDb[userIdx].rating = avg;
+        usersDb[userIdx].reviewsCount = count;
+        fbPutEntity('users', usersDb[userIdx].id, usersDb[userIdx]);
+      }
+
+      jobs.forEach(j => {
+        if (String(j.ownerId) === String(targetUserId)) {
+          j.ownerRating = avg;
+          fbPutEntity('jobs', j.id, j);
+        }
+      });
+
+      const app = applications.find(a => a.id === appId);
+      if (app) {
+        if (targetRole === 'worker') {
+          app.ratedWorker = true;
+          app.workerGivenRating = selectedStarScore;
+        } else {
+          app.ratedEmployer = true;
+          app.employerGivenRating = selectedStarScore;
+        }
+        fbPutEntity('applications', app.id, app);
+      }
+
+      saveAllState();
+      fbPutEntity('reviews', reviewObj.id, reviewObj);
+      closeRatingModal();
+      renderJobs();
+      renderWorkers();
+      renderCabinet();
+      showToast(`⭐ Оцінку ${selectedStarScore}/5 збережено! Новий рейтинг: ★ ${avg}`, 'success');
+    }
+
+    function renderMyReceivedReviews() {
+      const myRevs = reviewsDb.filter(r => String(r.targetUserId) === String(currentUser.id));
+      const container = document.getElementById('myReceivedReviewsList');
+      if (!myRevs.length) {
+        container.innerHTML = `<p style="margin:0;font-size:12px;color:var(--text-muted);">Поки що у вас немає оцінок. Вони з'являться після завершення спільних замовлень.</p>`;
+        return;
+      }
+      container.innerHTML = myRevs.map(r => `
+        <div style="background:#0c1324;border:1px solid var(--border);border-radius:12px;padding:10px;font-size:12px;display:flex;flex-direction:column;gap:4px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong>${escapeHtml(r.fromUserName)}</strong>
+            <span class="rating-star">${'★'.repeat(r.score)}${'☆'.repeat(5 - r.score)} (${r.score}/5)</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);">За вакансією: ${escapeHtml(r.jobTitle)}</div>
+          ${r.comment ? `<div style="color:var(--text-secondary);margin-top:2px;">«${escapeHtml(r.comment)}»</div>` : ''}
+        </div>`).join('');
+    }
+
+    // ==================== АДМІН-ПАНЕЛЬ ВЛАСНИКА ====================
+    let adminUserRoleFilter = 'all';
+
+    function setAdminSubTab(name) {
+      ['stats', 'payments', 'users', 'moderation', 'monobank', 'bot'].forEach(t => {
+        document.getElementById(`adm-${t}`).classList.add('hidden');
+        document.getElementById(`admBtn-${t}`).classList.remove('active');
+      });
+      document.getElementById(`adm-${name}`).classList.remove('hidden');
+      document.getElementById(`admBtn-${name}`).classList.add('active');
+      renderAdminData();
+    }
+
+    function setAdminUserRoleFilter(role) {
+      adminUserRoleFilter = role;
+      ['all', 'employer', 'worker'].forEach(r => {
+        const btn = document.getElementById(`admUserRole-${r}`);
+        if (btn) btn.classList.toggle('active', r === role);
+      });
+      renderAdminUsersList();
+    }
+
+    function renderAdminUsersList() {
+      const registeredUsers = usersDb.filter(u => u.isRegistered !== false);
+      const employers = registeredUsers.filter(u => u.role === 'employer');
+      const workers = registeredUsers.filter(u => u.role === 'worker');
+
+      const countAllEl = document.getElementById('admCountAllUsers');
+      const countEmpEl = document.getElementById('admCountEmployers');
+      const countWrkEl = document.getElementById('admCountWorkers');
+      const summaryBadge = document.getElementById('adminUsersSummaryBadge');
+
+      if (countAllEl) countAllEl.textContent = registeredUsers.length;
+      if (countEmpEl) countEmpEl.textContent = employers.length;
+      if (countWrkEl) countWrkEl.textContent = workers.length;
+      if (summaryBadge) {
+        summaryBadge.textContent = `💼 ${employers.length} • 👷 ${workers.length}`;
+      }
+
+      const q = (document.getElementById('adminUserSearchInput')?.value || '').toLowerCase().trim();
+      let list = [...registeredUsers];
+
+      if (adminUserRoleFilter === 'employer') {
+        list = list.filter(u => u.role === 'employer');
+      } else if (adminUserRoleFilter === 'worker') {
+        list = list.filter(u => u.role === 'worker');
+      }
+
+      if (q) {
+        list = list.filter(u =>
+          (u.name || '').toLowerCase().includes(q) ||
+          (u.phone || '').toLowerCase().includes(q) ||
+          (u.username || '').toLowerCase().includes(q) ||
+          (u.district || '').toLowerCase().includes(q) ||
+          (u.spec || '').toLowerCase().includes(q) ||
+          String(u.id || '').toLowerCase().includes(q)
+        );
+      }
+
+      const container = document.getElementById('adminUsersList');
+      if (!container) return;
+
+      if (!list.length) {
+        container.innerHTML = `<div class="card" style="text-align:center;color:var(--text-muted);font-size:12.5px;">Користувачів за цим фільтром не знайдено</div>`;
+        return;
+      }
+
+      container.innerHTML = list.map(u => {
+        const isEmp = u.role === 'employer';
+        const tgHandle = u.username ? (u.username.startsWith('@') ? u.username : '@' + u.username) : '';
+        const tgLink = tgHandle ? `https://t.me/${escapeHtml(tgHandle.replace('@', ''))}` : null;
+
+        return `
+          <div class="card stack-sm" style="padding:12px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+              <div>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px;">
+                  <span class="pill-badge ${isEmp ? 'pill-amber' : 'pill-emerald'}">
+                    ${isEmp ? '💼 Роботодавець' : '👷 Виконавець'}
+                  </span>
+                  <span class="rating-star" style="font-size:12px;">★ ${Number(u.rating || 5).toFixed(1)} (${u.reviewsCount || 0})</span>
+                  ${!isEmp ? `<span class="pill-badge ${u.isFree !== false ? 'pill-sky' : 'pill-rose'}">${u.isFree !== false ? 'Вільний' : 'Зайнятий'}</span>` : ''}
+                </div>
+                <div style="font-size:14px;font-weight:800;color:#ffffff;">${escapeHtml(u.name || 'Без імені')}</div>
+              </div>
+              <button onclick="askDeleteUser('${escapeHtml(u.id)}')" class="btn btn-danger btn-xs" title="Видалити користувача">🗑️ Видалити</button>
+            </div>
+
+            <div style="font-size:12px;color:var(--text-secondary);display:flex;flex-direction:column;gap:3px;">
+              <div>📍 Район: <strong>${escapeHtml(u.district || 'Львів')}</strong></div>
+              ${!isEmp && u.spec ? `<div>🛠 Спеціалізація: <strong>${escapeHtml(u.spec)}</strong></div>` : ''}
+              <div style="font-size:11px;color:var(--text-muted);font-family:monospace;">ID: ${escapeHtml(u.id)}</div>
+            </div>
+
+            <div style="display:flex;flex-wrap:wrap;gap:6px;padding-top:6px;border-top:1px solid var(--border);">
+              ${u.phone ? `<a href="tel:${escapeHtml(u.phone)}" class="btn btn-secondary btn-xs">📞 ${escapeHtml(u.phone)}</a>` : ''}
+              ${tgLink ? `<a href="${tgLink}" target="_blank" class="btn btn-sky btn-xs">💬 ${escapeHtml(tgHandle)}</a>` : '<span style="font-size:11px;color:var(--text-muted);align-self:center;">Без @username</span>'}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function askDeleteUser(userId) {
+      const target = usersDb.find(u => String(u.id) === String(userId));
+      const label = target ? `«${target.name}»` : 'цього користувача';
+      openConfirmDialog(
+        'Видалити користувача?',
+        `Профіль ${label} буде видалено з бази платформи.`,
+        '🗑️ Так, видалити',
+        () => deleteUserFromAdmin(userId)
+      );
+    }
+
+    function deleteUserFromAdmin(userId) {
+      usersDb = usersDb.filter(u => String(u.id) !== String(userId));
+      saveAllState();
+      fbDeleteEntity('users', userId);
+      renderAdminData();
+      renderWorkers();
+      showToast('🗑️ Користувача видалено з бази', 'info');
+    }
+
+    function loadAdminFields() {
+      document.getElementById('cfgMonoCard').value = config.monoCard || '';
+      document.getElementById('cfgPrice').value = config.price ?? 5;
+      document.getElementById('cfgFreeLimit').value = config.freeLimit ?? 1;
+      document.getElementById('cfgTopPrice').value = config.topPrice ?? 15;
+      document.getElementById('cfgUrgentPrice').value = config.urgentPrice ?? 10;
+      document.getElementById('cfgPromos').value = (config.promos || []).join(', ');
+      document.getElementById('cfgBotToken').value = config.botToken || '';
+      document.getElementById('cfgAdminChatId').value = config.adminChatId || '';
+      document.getElementById('cfgAdminPin').value = config.adminPin || '7777';
+      document.getElementById('cfgOwnerIds').value = (config.ownerIds || []).join(', ');
+      document.getElementById('cfgFirebaseUrl').value = config.firebaseUrl || LIVE_FIREBASE_URL;
+    }
+
+    function saveAdminSettings() {
+      config.monoCard = document.getElementById('cfgMonoCard').value.trim();
+      config.price = Number(document.getElementById('cfgPrice').value) || 5;
+      config.freeLimit = Number(document.getElementById('cfgFreeLimit').value) || 0;
+      config.topPrice = Number(document.getElementById('cfgTopPrice').value) || 15;
+      config.urgentPrice = Number(document.getElementById('cfgUrgentPrice').value) || 10;
+      config.promos = document.getElementById('cfgPromos').value.split(',').map(s => s.trim()).filter(Boolean);
+      config.botToken = document.getElementById('cfgBotToken').value.trim();
+      config.adminChatId = document.getElementById('cfgAdminChatId').value.trim();
+      config.adminPin = document.getElementById('cfgAdminPin').value.trim() || '7777';
+      config.ownerIds = document.getElementById('cfgOwnerIds').value.split(',').map(s => s.trim()).filter(Boolean);
+      config.firebaseUrl = document.getElementById('cfgFirebaseUrl').value.trim() || LIVE_FIREBASE_URL;
+
+      saveAllState();
+      fbPutConfig({
+        monoCard: config.monoCard,
+        price: config.price,
+        freeLimit: config.freeLimit,
+        topPrice: config.topPrice,
+        urgentPrice: config.urgentPrice,
+        promos: config.promos,
+        ownerIds: config.ownerIds
+      });
+      updateHeaderUI();
+      showToast('✅ Налаштування та тарифи збережено!', 'success');
+    }
+
+    function renderAdminData() {
+      const confirmed = payments.filter(p => p.status === 'confirmed');
+      const pending = payments.filter(p => p.status === 'pending');
+      const revenue = confirmed.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+      const registeredUsers = usersDb.filter(u => u.isRegistered !== false);
+
+      document.getElementById('statRevenue').textContent = `${revenue} грн`;
+      document.getElementById('statPaidOrders').textContent = confirmed.length;
+      document.getElementById('statActiveJobs').textContent = jobs.filter(j => j.status === 'active').length;
+      document.getElementById('statUsersCount').textContent = registeredUsers.length;
+      document.getElementById('pendingPayCount').textContent = pending.length;
+      document.getElementById('adminUsersTabCount').textContent = registeredUsers.length;
+      document.getElementById('adminJobsTabCount').textContent = jobs.length;
+
+      renderAdminUsersList();
+
+      // Оплати Monobank
+      const payEl = document.getElementById('adm-payments');
+      payEl.innerHTML = payments.length ? payments.map(p => `
+        <div class="card stack-sm">
+          <div style="display:flex;justify-content:space-between;font-size:12px;">
+            <span style="font-family:monospace;font-weight:900;color:var(--amber);">#${escapeHtml(p.code)}</span>
+            <span style="font-weight:800;color:${p.status === 'confirmed' ? '#34d399' : p.status === 'rejected' ? '#fb7185' : 'var(--amber)'};">
+              ${p.status === 'confirmed' ? '✅ Підтверджено' : p.status === 'rejected' ? '❌ Відхилено' : '⏳ Очікує перевірки'}
+            </span>
+          </div>
+          <div style="font-size:13px;font-weight:800;">${escapeHtml(p.jobTitle)} — ${p.amount} грн</div>
+          <div style="font-size:11.5px;color:var(--text-muted);">Послуга: ${escapeHtml(p.serviceLabel || 'Публікація')} • Від: ${escapeHtml(p.userName)}</div>
+          ${p.status === 'pending' ? `
+            <div class="grid-2" style="padding-top:4px;">
+              <button onclick="approvePayment('${p.id}')" class="btn btn-emerald btn-xs">✅ Підтвердити оплату</button>
+              <button onclick="rejectPayment('${p.id}')" class="btn btn-danger btn-xs">❌ Відхилити</button>
+            </div>` : ''}
+        </div>`).join('') : `<div class="card" style="text-align:center;color:var(--text-muted);font-size:12.5px;">Квитанцій на оплату поки немає</div>`;
+
+      // Модерація вакансій
+      const modEl = document.getElementById('adm-moderation');
+      const jobsHtml = jobs.length ? jobs.map(j => `
+        <div style="background:#0c1324;border:1px solid var(--border);border-radius:12px;padding:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:12.5px;font-weight:800;">${escapeHtml(j.title)}</div>
+            <div style="font-size:11px;color:var(--text-muted);">${escapeHtml(j.district)} • Є ${j.hiredWorkers || 0}/${j.neededWorkers || 1} • ${j.status}</div>
+          </div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;">
+            <button onclick="toggleTopJob('${j.id}')" class="btn btn-secondary btn-xs">${j.isTop ? 'Зняти ТОП' : '⭐ ТОП'}</button>
+            <button onclick="toggleUrgentJob('${j.id}')" class="btn btn-secondary btn-xs">${j.isUrgent ? 'Зняти 🔥' : '🔥 Терм.'}</button>
+            <button onclick="askDeleteJob('${j.id}')" class="btn btn-danger btn-xs">✕</button>
+          </div>
+        </div>`).join('') : `<p style="margin:0;font-size:12px;color:var(--text-muted);">Вакансій поки немає</p>`;
+
+      modEl.innerHTML = `
+        <div class="card stack-sm">
+          <h3 style="margin:0;font-size:14px;font-weight:800;">📋 Усі вакансії (${jobs.length})</h3>
+          ${jobsHtml}
+        </div>`;
+    }
+
+    function approvePayment(payId) {
+      const p = payments.find(x => x.id === payId);
+      if (!p) return;
+      p.status = 'confirmed';
+      const job = jobs.find(j => j.id === p.jobId);
+      if (job) {
+        if (p.grantPublish || job.status === 'pending_payment') job.status = 'active';
+        if (p.grantTop) job.isTop = true;
+        if (p.grantUrgent) {
+          job.isUrgent = true;
+          if (!Array.isArray(job.tags)) job.tags = [];
+          if (!job.tags.includes('urgent')) job.tags.push('urgent');
+        }
+        fbPutEntity('jobs', job.id, job);
+      }
+      saveAllState();
+      fbPutEntity('payments', p.id, p);
+      renderAdminData();
+      renderJobs();
+      showToast(`✅ Оплату #${p.code} підтверджено! Послуги активовано.`, 'success');
+    }
+
+    function rejectPayment(payId) {
+      const p = payments.find(x => x.id === payId);
+      if (!p) return;
+      p.status = 'rejected';
+      saveAllState();
+      fbPutEntity('payments', p.id, p);
+      renderAdminData();
+      showToast(`❌ Оплату #${p.code} відхилено`, 'error');
+    }
+
+    function toggleTopJob(jobId) {
+      const job = jobs.find(j => j.id === jobId);
+      if (!job) return;
+      job.isTop = !job.isTop;
+      saveAllState();
+      fbPutEntity('jobs', job.id, job);
+      renderAdminData();
+      renderJobs();
+    }
+
+    function toggleUrgentJob(jobId) {
+      const job = jobs.find(j => j.id === jobId);
+      if (!job) return;
+      job.isUrgent = !job.isUrgent;
+      if (!Array.isArray(job.tags)) job.tags = [];
+      if (job.isUrgent && !job.tags.includes('urgent')) job.tags.push('urgent');
+      if (!job.isUrgent) job.tags = job.tags.filter(t => t !== 'urgent');
+      saveAllState();
+      fbPutEntity('jobs', job.id, job);
+      renderAdminData();
+      renderJobs();
+    }
+
+    async function testTelegramBot() {
+      const token = document.getElementById('cfgBotToken').value.trim();
+      const chatId = document.getElementById('cfgAdminChatId').value.trim();
+      if (!token || !chatId) {
+        showToast('⚠️ Вкажіть Bot Token та Admin Chat ID!', 'error');
+        return;
+      }
+      const res = await safeFetchWithTimeout(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: '✅ Тестовий зв’язок успішний! Платформа «Підробіток.Львів» (v2.6) готова надсилати сюди квитанції Monobank.'
+        })
+      });
+      if (!res.ok) {
+        showToast('⚠️ Не вдалося зв’язатися з Telegram API — перевірте токен або Chat ID', 'error');
+        return;
+      }
+      const data = await res.response.json();
+      if (data.ok) {
+        showToast('✅ Тестове повідомлення надіслано в Telegram!', 'success');
+      } else {
+        showToast('⚠️ Перевірте правильність Bot Token або Chat ID', 'info');
+      }
+    }
+
+    // ==================== ІНІЦІАЛІЗАЦІЯ ДОДАТКУ ====================
+    cleanupExpiredFilledJobs(true);
+    updateHeaderUI();
+    renderJobs();
+    loadFromFirebase(true);
+
+    // Автоматична хмарна синхронізація кожні 8 секунд
+    setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadFromFirebase(true);
+      }
+    }, 8000);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        loadFromFirebase(true);
+      }
+    });
+
+    if (window.location.search.includes('admin=1')) {
+      triggerSecretAdminLogin();
+    }
+  </script>
+</body>
+</html>
